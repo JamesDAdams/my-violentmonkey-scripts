@@ -42,6 +42,13 @@
           <span class="nav-desc" data-i18n="discord.navDesc">Discord web</span>
         </span>
       </button>
+      <button type="button" class="nav-item" data-panel="steam-region-price" aria-current="false">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M2 2h9l11 11-9 9L2 11V2zm4.5 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></span>
+        <span class="nav-text">
+          <span class="nav-name" data-i18n="region.name">Region + key price</span>
+          <span class="nav-desc" data-i18n="region.navDesc">Steam store</span>
+        </span>
+      </button>
     </nav>
 
     <div class="sidebar-foot">
@@ -126,6 +133,35 @@
       </div>
     </article>
 
+    <article class="panel" id="panel-steam-region-price" aria-labelledby="region-title" hidden>
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 id="region-title">Steam — <span data-i18n="region.name">Region + key price</span></h2>
+          <span class="tag">Steam</span>
+        </div>
+
+        <p class="lead" data-i18n="region.desc">Two badges on the purchase box: the Steam price of the country you pick, and the cheapest key price on GG.deals. DLC rows get them too.</p>
+
+        <ul class="feats">
+          <li data-i18n="region.f1">Choose any country for the Steam price — Argentina, Turkey, the US… — and any region for key prices.</li>
+          <li data-i18n="region.f2">The key price comes from GG.deals with your own free API key; badges link straight to SteamDB and GG.deals.</li>
+          <li data-i18n="region.f3">Your key and your regions stay inside the script, on your computer.</li>
+        </ul>
+
+        <div class="actions">
+          <button type="button" class="btn" id="install-region" data-i18n="region.configure">Configure &amp; install</button>
+          <a class="btn ghost" href="https://github.com/JamesDAdams/my-violentmonkey-scripts/tree/main/steam-region-price" data-i18n="details">Details</a>
+        </div>
+
+        <p class="meta">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-i18n="region.meta">GG.deals API key required for key prices</span>
+          <span class="sep" aria-hidden="true">·</span>
+          <span class="version" data-version-src="https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/steam-region-price.user.js">v4.0</span>
+        </p>
+      </div>
+    </article>
+
     <section class="help">
       <h2 data-i18n="help.title">No userscript manager yet?</h2>
       <p data-i18n="help.text">The Install button opens the script file. Violentmonkey or Tampermonkey catches it and offers to install — without one, the browser simply displays the code.</p>
@@ -135,6 +171,48 @@
   </main>
 
 </div>
+
+<dialog id="config-dialog" class="config" aria-labelledby="cfg-title">
+  <form class="config-box" id="config-form" novalidate>
+    <h2 id="cfg-title" data-i18n="cfg.title">Configure the script</h2>
+    <p class="config-sub" data-i18n="cfg.sub">Three values, then the script is generated for you.</p>
+
+    <div class="field">
+      <label for="cfg-key" data-i18n="cfg.key">GG.deals API key</label>
+      <input id="cfg-key" type="text" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
+      <p class="hint">
+        <span data-i18n="cfg.keyHint">Free key on</span>
+        <a href="https://gg.deals/api/" target="_blank" rel="noopener">gg.deals/api</a> ·
+        <span data-i18n="cfg.keyOpt">optional, the key badge will ask for one</span>
+      </p>
+    </div>
+
+    <div class="field">
+      <label id="cfg-region-label" data-i18n="cfg.region">GG.deals region (key prices)</label>
+      <div class="picker" id="picker-region"></div>
+    </div>
+
+    <div class="field">
+      <label id="cfg-steam-label" data-i18n="cfg.steam">Steam region (store price)</label>
+      <div class="picker" id="picker-steam"></div>
+    </div>
+
+    <p class="privacy" data-i18n="cfg.privacy">Nothing is stored by this site: no server, no database, no cookie. The script is generated in your browser and downloaded to your computer — your key never leaves it.</p>
+
+    <div class="config-actions" id="cfg-actions">
+      <button type="button" class="btn ghost" data-close data-i18n="cfg.cancel">Cancel</button>
+      <button type="submit" class="btn" id="cfg-generate" data-i18n="cfg.generate">Generate the script</button>
+    </div>
+
+    <div class="config-result" id="cfg-result" hidden>
+      <p id="cfg-result-text"></p>
+      <div class="config-actions">
+        <button type="button" class="btn ghost" id="cfg-copy" data-i18n="cfg.copy">Copy the code</button>
+        <button type="button" class="btn" data-close data-i18n="cfg.close">Close</button>
+      </div>
+    </div>
+  </form>
+</dialog>
 
 <script src="app.js"></script>
 </body>

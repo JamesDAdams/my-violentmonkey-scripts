@@ -23,6 +23,32 @@
       'discord.f3': 'No network request and no analytics: everything stays between your two tabs.',
       'discord.meta': 'Requires an open Discord tab',
       'discord.alt': 'Discord invite page with the green “Send to my Discord tab” button',
+      'region.name': 'Region + key price',
+      'region.navDesc': 'Steam store',
+      'region.desc': 'Two badges on the purchase box: the Steam price of the country you pick, and the cheapest key price on GG.deals. DLC rows get them too.',
+      'region.f1': 'Choose any country for the Steam price — Argentina, Turkey, the US… — and any region for key prices.',
+      'region.f2': 'The key price comes from GG.deals with your own free API key; badges link straight to SteamDB and GG.deals.',
+      'region.f3': 'Your key and your regions stay inside the script, on your computer.',
+      'region.configure': 'Configure & install',
+      'region.meta': 'GG.deals API key required for key prices',
+      'cfg.title': 'Configure the script',
+      'cfg.sub': 'Three values, then the script is generated for you.',
+      'cfg.key': 'GG.deals API key',
+      'cfg.keyHint': 'Free key on',
+      'cfg.keyOpt': 'optional, the key badge will ask for one',
+      'cfg.region': 'GG.deals region (key prices)',
+      'cfg.steam': 'Steam region (store price)',
+      'cfg.privacy': 'Nothing is stored by this site: no server, no database, no cookie. The script is generated in your browser and downloaded to your computer — your key never leaves it.',
+      'cfg.cancel': 'Cancel',
+      'cfg.generate': 'Generate the script',
+      'cfg.copy': 'Copy the code',
+      'cfg.close': 'Close',
+      'cfg.search': 'Search a country…',
+      'cfg.downloaded': 'steam-region-price.user.js downloaded. Drag it into the Violentmonkey dashboard, or open it with “New script” and paste the code.',
+      'cfg.copied': 'Code copied to the clipboard.',
+      'cfg.copyFailed': 'Copy failed — select the code manually.',
+      'cfg.error': 'Could not download the template. Check your connection and try again.',
+      'cfg.selected': 'Selected',
       'help.title': 'No userscript manager yet?',
       'help.text': 'The Install button opens the script file. Violentmonkey or Tampermonkey catches it and offers to install — without one, the browser simply displays the code.',
       'help.btn': 'Get Violentmonkey',
@@ -48,6 +74,32 @@
       'discord.f3': 'Aucune requête réseau, aucune analyse : tout reste entre vos deux onglets.',
       'discord.meta': 'Nécessite un onglet Discord ouvert',
       'discord.alt': 'Page d’invitation Discord avec le bouton vert « Envoyer vers mon onglet Discord »',
+      'region.name': 'Prix région + clé',
+      'region.navDesc': 'Boutique Steam',
+      'region.desc': 'Deux badges sur l’encart d’achat : le prix Steam du pays choisi, et le prix clé le moins cher sur GG.deals. Les lignes de DLC en profitent aussi.',
+      'region.f1': 'Choisissez n’importe quel pays pour le prix Steam — Argentine, Turquie, États-Unis… — et n’importe quelle région pour les prix des clés.',
+      'region.f2': 'Le prix des clés vient de GG.deals avec votre propre clé API gratuite ; les badges renvoient vers SteamDB et GG.deals.',
+      'region.f3': 'Votre clé et vos régions restent dans le script, sur votre ordinateur.',
+      'region.configure': 'Configurer & installer',
+      'region.meta': 'Clé API GG.deals requise pour les prix des clés',
+      'cfg.title': 'Configurer le script',
+      'cfg.sub': 'Trois valeurs, puis le script est généré pour vous.',
+      'cfg.key': 'Clé API GG.deals',
+      'cfg.keyHint': 'Clé gratuite sur',
+      'cfg.keyOpt': 'facultatif : le badge clé vous la demandera',
+      'cfg.region': 'Région GG.deals (prix des clés)',
+      'cfg.steam': 'Région Steam (prix boutique)',
+      'cfg.privacy': 'Aucune valeur n’est enregistrée par ce site : pas de serveur, pas de base, pas de cookie. Le script est fabriqué dans votre navigateur et téléchargé sur votre ordinateur — votre clé ne le quitte jamais.',
+      'cfg.cancel': 'Annuler',
+      'cfg.generate': 'Générer le script',
+      'cfg.copy': 'Copier le code',
+      'cfg.close': 'Fermer',
+      'cfg.search': 'Rechercher un pays…',
+      'cfg.downloaded': 'steam-region-price.user.js téléchargé. Glissez-le dans le tableau de bord Violentmonkey, ou ouvrez « Nouveau script » et collez le code.',
+      'cfg.copied': 'Code copié dans le presse-papiers.',
+      'cfg.copyFailed': 'Copie impossible — sélectionnez le code à la main.',
+      'cfg.error': 'Téléchargement du modèle impossible. Vérifiez la connexion et réessayez.',
+      'cfg.selected': 'Sélectionné',
       'help.title': 'Pas encore de gestionnaire de userscripts ?',
       'help.text': 'Le bouton Installer ouvre le fichier du script. Violentmonkey ou Tampermonkey l’intercepte et propose l’installation — sans gestionnaire, le navigateur affiche simplement le code.',
       'help.btn': 'Installer Violentmonkey',
@@ -71,6 +123,8 @@
     ? stored
     : (String(navigator.language || 'en').toLowerCase().startsWith('fr') ? 'fr' : 'en');
 
+  const langHooks = [];
+
   const applyLang = next => {
     lang = I18N[next] ? next : 'en';
     document.documentElement.lang = lang;
@@ -89,6 +143,7 @@
       if (text != null) el.alt = text;
     }
     try { localStorage.setItem(STORAGE_KEY, lang); } catch { /* stockage bloqué */ }
+    for (const fn of langHooks) fn();
   };
 
   for (const btn of document.querySelectorAll('[data-lang]')) {
@@ -125,6 +180,213 @@
   addEventListener('hashchange', () => select((location.hash || '').slice(1), false));
 
   select((location.hash || '').slice(1) || document.querySelector('.nav-item')?.dataset.panel, false);
+
+  /* ---------- installeur configuré : prix région + clés ---------- */
+
+  const REGION_TEMPLATE = 'https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/steam-region-price.user.js';
+
+  const CODES = (
+    'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ ' +
+    'CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR ' +
+    'GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP ' +
+    'KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT ' +
+    'MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW ' +
+    'SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG ' +
+    'UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW XK'
+  ).split(' ');
+
+  const fold = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const flagSrc = code => 'https://flagcdn.com/w20/' + code.toLowerCase() + '.png';
+  const countryName = code => {
+    const up = String(code).toUpperCase();
+    try { return new Intl.DisplayNames([lang], { type: 'region' }).of(up) || up; }
+    catch { return up; }
+  };
+  const flagImg = code => {
+    const img = document.createElement('img');
+    img.className = 'flag';
+    img.alt = '';
+    img.loading = 'lazy';
+    img.src = flagSrc(code);
+    img.addEventListener('error', () => img.remove(), { once: true });
+    return img;
+  };
+
+  function makePicker(root, initial, onChange) {
+    if (!root) return { refresh() {} };
+    let value = initial;
+    let open = false;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'picker-btn';
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.setAttribute('aria-expanded', 'false');
+
+    const panel = document.createElement('div');
+    panel.className = 'picker-panel';
+    panel.hidden = true;
+
+    const search = document.createElement('input');
+    search.type = 'search';
+    search.className = 'picker-search';
+    search.placeholder = I18N[lang]['cfg.search'];
+
+    const list = document.createElement('ul');
+    list.className = 'picker-list';
+    list.setAttribute('role', 'listbox');
+
+    const paintButton = () => {
+      btn.textContent = '';
+      btn.append(flagImg(value), document.createTextNode(countryName(value)));
+      const code = document.createElement('span');
+      code.className = 'code';
+      code.textContent = value;
+      btn.append(code);
+    };
+
+    const paintList = filter => {
+      const q = fold(String(filter || '').trim());
+      list.textContent = '';
+      const frag = document.createDocumentFragment();
+      let count = 0;
+      for (const code of CODES) {
+        const name = countryName(code);
+        if (q && !fold(name).includes(q) && !code.toLowerCase().includes(q)) continue;
+        const li = document.createElement('li');
+        const opt = document.createElement('button');
+        opt.type = 'button';
+        opt.className = 'picker-opt';
+        opt.setAttribute('role', 'option');
+        opt.setAttribute('aria-selected', String(code.toLowerCase() === value));
+        const nm = document.createElement('span');
+        nm.textContent = name;
+        const cd = document.createElement('span');
+        cd.className = 'code';
+        cd.textContent = code;
+        opt.append(flagImg(code), nm, cd);
+        opt.addEventListener('click', () => {
+          value = code.toLowerCase();
+          paintButton();
+          close();
+          onChange && onChange(value);
+        });
+        li.append(opt);
+        frag.append(li);
+        count++;
+      }
+      if (!count) {
+        const li = document.createElement('li');
+        li.className = 'picker-empty';
+        li.textContent = '—';
+        frag.append(li);
+      }
+      list.append(frag);
+    };
+
+    function openPanel() {
+      open = true;
+      panel.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      search.value = '';
+      paintList('');
+      search.focus();
+    }
+    function close() {
+      open = false;
+      panel.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    btn.addEventListener('click', () => (open ? close() : openPanel()));
+    search.addEventListener('input', () => paintList(search.value));
+    document.addEventListener('click', e => {
+      if (open && !root.contains(e.target)) close();
+    });
+    root.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && open) { e.stopPropagation(); close(); btn.focus(); }
+    });
+
+    panel.append(search, list);
+    root.append(btn, panel);
+    paintButton();
+
+    langHooks.push(() => {
+      search.placeholder = I18N[lang]['cfg.search'];
+      paintButton();
+      if (open) paintList(search.value);
+    });
+
+    return { refresh: paintButton };
+  }
+
+  const dlg = document.getElementById('config-dialog');
+  if (dlg) {
+    const form = document.getElementById('config-form');
+    const keyInput = document.getElementById('cfg-key');
+    const result = document.getElementById('cfg-result');
+    const resultText = document.getElementById('cfg-result-text');
+    const actions = document.getElementById('cfg-actions');
+    let generated = '';
+    let region = 'fr';
+    let steam = 'ar';
+
+    makePicker(document.getElementById('picker-region'), region, v => { region = v; });
+    makePicker(document.getElementById('picker-steam'), steam, v => { steam = v; });
+
+    const installBtn = document.getElementById('install-region');
+    installBtn && installBtn.addEventListener('click', () => {
+      result.hidden = true;
+      actions.hidden = false;
+      dlg.showModal();
+      keyInput.focus();
+    });
+
+    dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const key = keyInput.value.trim().replace(/[^A-Za-z0-9_-]/g, '');
+      result.hidden = false;
+      resultText.textContent = '…';
+      try {
+        const tpl = await fetch(REGION_TEMPLATE, { cache: 'no-store' }).then(r => {
+          if (!r.ok) throw new Error('http ' + r.status);
+          return r.text();
+        });
+        generated = tpl
+          .replace(/(const GG_DEALS_API_KEY = )'[^']*';/, (_m, p1) => p1 + "'" + key + "';")
+          .replace(/(const GG_DEALS_REGION = )'[^']*';/, (_m, p1) => p1 + "'" + region + "';")
+          .replace(/(const STEAM_REGION = )'[^']*';/, (_m, p1) => p1 + "'" + steam + "';");
+
+        const blob = new Blob([generated], { type: 'text/javascript' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'steam-region-price.user.js';
+        document.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+        resultText.textContent = I18N[lang]['cfg.downloaded'];
+        actions.hidden = true;
+      } catch (err) {
+        resultText.textContent = I18N[lang]['cfg.error'];
+      }
+    });
+
+    const copyBtn = document.getElementById('cfg-copy');
+    copyBtn && copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(generated);
+        resultText.textContent = I18N[lang]['cfg.copied'];
+      } catch {
+        resultText.textContent = I18N[lang]['cfg.copyFailed'];
+      }
+    });
+  }
 
   /* ---------- version réelle du script ---------- */
 
