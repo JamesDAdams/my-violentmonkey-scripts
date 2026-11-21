@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.7
+// @version      4.8
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
@@ -432,7 +432,9 @@
         notice: 'Aucune configuration détectée : renseignez-la une fois, elle restera sur votre machine.',
         hint: 'Valeurs enregistrées par le gestionnaire de userscripts, sur votre machine.',
         keyLabel: 'Clé API GG.deals (gg.deals/api)',
-        keyHint: 'Clé gratuite sur gg.deals/api · facultative : le badge 🔑 vous la redemandera',
+        keyHint: 'Obligatoire pour afficher le prix des clés.',
+        keyLink: 'Générer une clé gratuite sur GG.deals',
+        keyRequired: 'Renseignez une clé API : elle est obligatoire pour afficher le prix des clés.',
         ggRegion: 'Région GG.deals (prix des clés)',
         steamRegion: 'Région Steam (prix boutique)',
         showSteam: 'Prix Steam',
@@ -446,7 +448,9 @@
         notice: 'No configuration found: set it once, it stays on your machine.',
         hint: 'Stored by your userscript manager, on your machine.',
         keyLabel: 'GG.deals API key (gg.deals/api)',
-        keyHint: 'Free key on gg.deals/api · optional: the 🔑 badge will ask again',
+        keyHint: 'Required to show the key price.',
+        keyLink: 'Generate a free key on GG.deals',
+        keyRequired: 'Enter an API key: it is required to show the key price.',
         ggRegion: 'GG.deals region (key prices)',
         steamRegion: 'Steam region (store price)',
         showSteam: 'Steam price',
@@ -659,7 +663,14 @@
 
         const keyHint = document.createElement('p');
         keyHint.className = 'srp-hint';
-        keyHint.textContent = UI.keyHint;
+        const keyHintText = document.createElement('span');
+        keyHintText.textContent = UI.keyHint + ' ';
+        const keyLink = document.createElement('a');
+        keyLink.href = 'https://gg.deals/api/';
+        keyLink.target = '_blank';
+        keyLink.rel = 'noopener noreferrer';
+        keyLink.textContent = UI.keyLink;
+        keyHint.append(keyHintText, keyLink);
 
         // --- régions ---
         const row = document.createElement('div');
@@ -685,6 +696,11 @@
         warning.className = 'srp-error';
         warning.hidden = true;
         warning.textContent = UI.oneRequired;
+
+        const keyError = document.createElement('p');
+        keyError.className = 'srp-error srp-key-error';
+        keyError.hidden = true;
+        keyError.textContent = UI.keyRequired;
 
         // --- actions ---
         const actions = document.createElement('div');
@@ -715,6 +731,7 @@
             pickerSteam.button.disabled = !steamOn;
 
             warning.hidden = !!(steamOn || keysOn);
+            if (!keysOn) keyError.hidden = true;
             warning.classList.toggle('srp-error-visible', !steamOn && !keysOn);
             save.disabled = !steamOn && !keysOn;
         };
@@ -735,14 +752,23 @@
 
             const showSteam = swSteam.input.checked;
             const showKeys = swKeys.input.checked;
+            const apiKey = keyInput.value.trim();
+
             if (!showSteam && !showKeys) {
                 warning.hidden = false;
                 return;
             }
 
+            if (showKeys && !apiKey) {
+                keyError.hidden = false;
+                keyInput.focus();
+                return;
+            }
+            keyError.hidden = true;
+
             if (typeof GM_setValue === 'function') {
                 GM_setValue(STORED_KEY, {
-                    key: keyInput.value.trim(),
+                    key: apiKey,
                     ggRegion: pickerGG.value,
                     steamRegion: pickerSteam.value,
                     showSteam,
@@ -752,7 +778,7 @@
             location.reload();
         });
 
-        box.append(title, intro, switches, keyField, keyHint, row, warning, actions);
+        box.append(title, intro, switches, keyField, keyHint, keyError, row, warning, actions);
         overlay.append(box);
         document.body.append(overlay);
         refreshToggles();

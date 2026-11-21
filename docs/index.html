@@ -7,7 +7,7 @@
 <meta name="description" content="Userscripts for Steam, Discord and the web, installed in one click with Violentmonkey or Tampermonkey.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#10151b">
-<link rel="stylesheet" href="styles.css?v=12">
+<link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
 
@@ -193,10 +193,10 @@
       <label for="cfg-key" data-i18n="cfg.key">GG.deals API key</label>
       <input id="cfg-key" type="text" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
       <p class="hint">
-        <span data-i18n="cfg.keyHint">Free key on</span>
-        <a href="https://gg.deals/api/" target="_blank" rel="noopener">gg.deals/api</a> ·
-        <span data-i18n="cfg.keyOpt">optional, the key badge will ask for one</span>
+        <span data-i18n="cfg.keyHint">Required to show the key price.</span>
+        <a href="https://gg.deals/api/" target="_blank" rel="noopener" data-i18n="cfg.keyLink">Generate a free key on GG.deals</a>
       </p>
+      <p class="toggle-warn" id="cfg-key-warn" hidden data-i18n="cfg.keyRequired">Enter an API key: it is required to show the key price.</p>
     </div>
 
     <div class="field" id="field-region">
@@ -229,7 +229,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
 <script>
   // Filet de sécurité : si app.js vient d'un cache trop ancien, on recharge une copie fraîche.
   addEventListener('load', function () {

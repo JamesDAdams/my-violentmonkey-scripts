@@ -39,7 +39,9 @@
       'cfg.title': 'Configure the script',
       'cfg.sub': 'Three values, then the script is generated for you.',
       'cfg.key': 'GG.deals API key',
-      'cfg.keyHint': 'Free key on',
+      'cfg.keyHint': 'Required to show the key price.',
+      'cfg.keyLink': 'Generate a free key on GG.deals',
+      'cfg.keyRequired': 'Enter an API key: it is required to show the key price.',
       'cfg.keyOpt': 'optional, the key badge will ask for one',
       'cfg.region': 'GG.deals region (key prices)',
       'cfg.steam': 'Steam region (store price)',
@@ -96,7 +98,9 @@
       'cfg.title': 'Configurer le script',
       'cfg.sub': 'Trois valeurs, puis le script est généré pour vous.',
       'cfg.key': 'Clé API GG.deals',
-      'cfg.keyHint': 'Clé gratuite sur',
+      'cfg.keyHint': 'Obligatoire pour afficher le prix des clés.',
+      'cfg.keyLink': 'Générer une clé gratuite sur GG.deals',
+      'cfg.keyRequired': 'Renseignez une clé API : elle est obligatoire pour afficher le prix des clés.',
       'cfg.keyOpt': 'facultatif : le badge clé vous la demandera',
       'cfg.region': 'Région GG.deals (prix des clés)',
       'cfg.steam': 'Région Steam (prix boutique)',
@@ -397,6 +401,7 @@
     const onSteam = document.getElementById('cfg-on-steam');
     const onKeys = document.getElementById('cfg-on-gg');
     const warn = document.getElementById('cfg-toggle-warn');
+    const keyWarn = document.getElementById('cfg-key-warn');
     const genBtn = document.getElementById('cfg-generate');
     const fieldKey = document.getElementById('field-key');
     const fieldRegion = document.getElementById('field-region');
@@ -410,6 +415,7 @@
       fieldRegion.classList.toggle('is-off', !onKeys.checked);
       fieldSteam.classList.toggle('is-off', !onSteam.checked);
       keyInput.disabled = !onKeys.checked;
+      if (!onKeys.checked) keyWarn.hidden = true;
       const b1 = fieldRegion.querySelector('.picker-btn');
       const b2 = fieldSteam.querySelector('.picker-btn');
       if (b1) b1.disabled = !onKeys.checked;
@@ -435,6 +441,13 @@
     form.addEventListener('submit', async e => {
       e.preventDefault();
       if (!onSteam.checked && !onKeys.checked) { refreshToggles(); return; }
+
+      if (onKeys.checked && !keyInput.value.trim()) {
+        keyWarn.hidden = false;
+        keyInput.focus();
+        return;
+      }
+      keyWarn.hidden = true;
       const key = keyInput.value.trim().replace(/[^A-Za-z0-9_-]/g, '');
       result.hidden = false;
       resultText.textContent = '…';
