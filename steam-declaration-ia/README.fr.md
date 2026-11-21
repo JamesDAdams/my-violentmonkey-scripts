@@ -8,17 +8,13 @@ Pas de compte, pas de service tiers, pas de télémétrie : tout est lu dans la 
 
 ## Aperçu
 
-**Sur une fiche de jeu** — une ligne « IA » en tête de l'encart *glance*, un tag par usage déclaré, l'extrait au survol, le saut à la déclaration au clic. L'interface suit la langue du navigateur :
+**Sur une fiche de jeu** — une ligne « IA » en tête de l'encart *glance*, un tag par usage déclaré, l'extrait au survol, le saut à la déclaration au clic :
 
-| Français | English |
-| --- | --- |
-| <img src="screenshots/fiche-fr.png" width="480" alt="Ligne IA sur une fiche Steam"> | <img src="screenshots/fiche-en.png" width="290" alt="Ligne AI sur une fiche Steam en anglais"> |
+<img src="screenshots/fiche-fr.png" width="620" alt="Ligne IA sur une fiche Steam">
 
 **Sur les listes** (accueil, recherche, tags, promotions) — un bandeau **IA** sur les vignettes concernées, avec les usages déclarés en infobulle :
 
-| Dans une liste | Gros plan |
-| --- | --- |
-| <img src="screenshots/vignettes.png" width="520" alt="Bandeaux IA sur des vignettes Steam"> | <img src="screenshots/vignette-ia.png" width="240" alt="Bandeau AI sur une vignette de jeu"> |
+<img src="screenshots/vignettes.png" width="620" alt="Bandeaux IA sur des vignettes Steam">
 
 ## Installation
 

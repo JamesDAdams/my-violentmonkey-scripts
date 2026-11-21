@@ -8,17 +8,13 @@ No account, no third-party service, no telemetry: everything is read from the pa
 
 ## Preview
 
-**On a game page** — an “AI” row at the top of the *glance* box, one tag per declared use, the excerpt on hover, jump to the disclosure on click. The UI follows the browser language:
+**On a game page** — an “AI” row at the top of the *glance* box, one tag per declared use, the excerpt on hover, jump to the disclosure on click:
 
-| English | Français |
-| --- | --- |
-| <img src="screenshots/fiche-en.png" width="290" alt="AI row on a Steam page"> | <img src="screenshots/fiche-fr.png" width="480" alt="Ligne IA sur une fiche Steam"> |
+<img src="screenshots/fiche-en.png" width="360" alt="AI row on a Steam game page">
 
 **On listings** (home, search, tags, sales) — an **AI** badge on the matching thumbnails, with the declared uses in the tooltip:
 
-| In a list | Close-up |
-| --- | --- |
-| <img src="screenshots/vignettes.png" width="520" alt="AI badges on Steam thumbnails"> | <img src="screenshots/vignette-ia.png" width="240" alt="AI badge on a game thumbnail"> |
+<img src="screenshots/vignette-ia.png" width="300" alt="AI badge on a Steam game thumbnail">
 
 ## Installation
 
