@@ -15,6 +15,13 @@
       install: 'Install',
       details: 'Details',
       'steam.meta': 'French / English interface',
+      'discord.name': 'Invite → open tab',
+      'discord.navDesc': 'Discord web',
+      'discord.desc': 'On a Discord invite page, the usual flow loads Discord in the current tab — login screen included. This script adds a button that sends the invite straight to the Discord tab you already have open, already logged in.',
+      'discord.f1': 'A “Send to my Discord tab” button under “Create Account”, on discord.com/invite/… and discord.gg/…',
+      'discord.f2': 'The invite code travels through the userscript storage, then your Discord tab opens the invite and takes focus.',
+      'discord.f3': 'No network request and no analytics: everything stays between your two tabs.',
+      'discord.meta': 'Requires an open Discord tab',
       'help.title': 'No userscript manager yet?',
       'help.text': 'The Install button opens the script file. Violentmonkey or Tampermonkey catches it and offers to install — without one, the browser simply displays the code.',
       'help.btn': 'Get Violentmonkey',
@@ -32,6 +39,13 @@
       install: 'Installer',
       details: 'Détails',
       'steam.meta': 'Interface français / anglais',
+      'discord.name': 'Invitation → onglet',
+      'discord.navDesc': 'Discord web',
+      'discord.desc': 'Sur une page d’invitation Discord, le parcours classique charge Discord dans l’onglet courant — écran de connexion compris. Ce script ajoute un bouton qui envoie l’invitation directement à l’onglet Discord déjà ouvert, déjà connecté.',
+      'discord.f1': 'Un bouton « Envoyer vers mon onglet Discord » sous « Create Account », sur discord.com/invite/… et discord.gg/…',
+      'discord.f2': 'Le code d’invitation transite par le stockage du gestionnaire de userscripts, puis l’onglet Discord ouvre l’invitation et reprend le focus.',
+      'discord.f3': 'Aucune requête réseau, aucune analyse : tout reste entre vos deux onglets.',
+      'discord.meta': 'Nécessite un onglet Discord ouvert',
       'help.title': 'Pas encore de gestionnaire de userscripts ?',
       'help.text': 'Le bouton Installer ouvre le fichier du script. Violentmonkey ou Tampermonkey l’intercepte et propose l’installation — sans gestionnaire, le navigateur affiche simplement le code.',
       'help.btn': 'Installer Violentmonkey',
@@ -108,15 +122,13 @@
 
   /* ---------- version réelle du script ---------- */
 
-  const versionEl = document.getElementById('steam-version');
-  const installEl = document.getElementById('install-steam');
-  if (versionEl && installEl) {
-    fetch(installEl.href, { cache: 'no-store' })
+  for (const el of document.querySelectorAll('[data-version-src]')) {
+    fetch(el.dataset.versionSrc, { cache: 'no-store' })
       .then(r => (r.ok ? r.text() : null))
       .then(txt => {
         const m = txt && txt.match(/^\/\/\s*@version\s+(\S+)/m);
-        if (m) versionEl.textContent = 'v' + m[1];
+        if (m) el.textContent = 'v' + m[1];
       })
-      .catch(() => { /* hors ligne : on garde la version statique */ });
+      .catch(() => { /* hors ligne : version statique */ });
   }
 })();
