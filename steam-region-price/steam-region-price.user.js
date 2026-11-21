@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.5
+// @version      4.6
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
@@ -192,29 +192,94 @@
             font: 13px/1.5 Arial, Helvetica, sans-serif;
         }
         .srp-box {
-            background: #1b2838; color: #dfe7ee;
-            border: 1px solid #3d4a58; border-radius: 12px;
-            padding: 18px 20px; width: min(430px, calc(100vw - 32px));
-            box-shadow: 0 20px 60px rgba(0,0,0,.6);
+            background: linear-gradient(165deg, #1c232d, #171d25); color: #dfe7ee;
+            border: 1px solid #3d4a58; border-radius: 16px;
+            padding: 22px 24px; width: min(560px, calc(100vw - 32px));
+            box-shadow: 0 30px 80px rgba(0,0,0,.65);
+            display: flex; flex-direction: column; gap: 14px;
+            max-height: calc(100vh - 40px); overflow: auto;
         }
-        .srp-box h3 { margin: 0 0 4px; font-size: 15px; }
-        .srp-box p { margin: 0 0 12px; font-size: 11.5px; color: #9fb0bf; }
-        .srp-box label { display: block; margin-bottom: 10px; font-size: 12px; color: #c3d2de; }
-        .srp-box input[type=text] {
-            display: block; width: 100%; margin-top: 4px;
-            background: #0f151b; border: 1px solid #3d4a58; border-radius: 7px;
-            color: #e6edf3; padding: 7px 9px; font: inherit; font-size: 13px;
+        .srp-box h3 { margin: 0; font-size: 18px; color: #fff; }
+        .srp-intro { margin: -8px 0 0; font-size: 12.5px; color: #9fb0bf; }
+
+        .srp-switches { display: flex; flex-wrap: wrap; gap: 10px; }
+        .srp-switch {
+            display: inline-flex; align-items: center; gap: 9px;
+            padding: 8px 12px; border: 1px solid #3d4a58; border-radius: 9px;
+            background: #0f151b; font-size: 13px; color: #dfe7ee; cursor: pointer;
+            user-select: none; margin: 0;
         }
-        .srp-row { display: flex; gap: 10px; }
-        .srp-row label { flex: 1; }
-        .srp-check { display: flex; align-items: center; gap: 7px; margin: 0; }
-        .srp-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+        .srp-switch:hover { border-color: #55636f; }
+        .srp-switch input {
+            appearance: none; -webkit-appearance: none;
+            width: 34px; height: 19px; border-radius: 999px; margin: 0;
+            background: #39434f; border: 1px solid #4a5663; position: relative; cursor: pointer; flex: 0 0 34px;
+        }
+        .srp-switch input::after {
+            content: ""; position: absolute; top: 2px; left: 2px;
+            width: 13px; height: 13px; border-radius: 50%; background: #e8ebef; transition: transform .12s ease;
+        }
+        .srp-switch input:checked { background: #ff913c; border-color: #ffa45f; }
+        .srp-switch input:checked::after { transform: translateX(15px); background: #171108; }
+
+        .srp-field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: #c3d2de; }
+        .srp-field.srp-off { opacity: .45; }
+        .srp-field.srp-off > span { text-decoration: line-through; text-decoration-thickness: 1px; }
+        .srp-field input[type=text] {
+            background: #0f151b; border: 1px solid #3d4a58; border-radius: 9px;
+            color: #e6edf3; padding: 9px 12px; font: inherit; font-size: 14px; width: 100%;
+        }
+        .srp-field input[type=text]:focus { outline: 2px solid rgba(255,145,60,.45); outline-offset: 1px; border-color: #ff913c; }
+        .srp-hint { margin: -6px 0 0; font-size: 11.5px; color: #8fa2b1; }
+        .srp-hint a { color: #ff913c; }
+
+        .srp-row { display: flex; gap: 12px; }
+        .srp-row > .srp-field { flex: 1; min-width: 0; }
+
+        .srp-picker { position: relative; }
+        .srp-picker-btn {
+            display: flex; align-items: center; gap: 9px; width: 100%;
+            background: #0f151b; border: 1px solid #3d4a58; border-radius: 9px;
+            color: #e6edf3; padding: 9px 12px; font: inherit; font-size: 14px;
+            cursor: pointer; text-align: left;
+        }
+        .srp-picker-btn:disabled { cursor: not-allowed; }
+        .srp-picker-btn:hover:not(:disabled) { border-color: #55636f; }
+        .srp-picker-btn .srp-code { margin-left: auto; color: #8fa2b1; font-size: 11px; letter-spacing: .5px; }
+
+        .srp-picker-panel {
+            position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px);
+            background: #141a21; border: 1px solid #3d4a58; border-radius: 10px;
+            box-shadow: 0 20px 50px rgba(0,0,0,.6); overflow: hidden;
+        }
+        .srp-picker-panel[hidden] { display: none; }
+        .srp-search {
+            width: 100%; border: 0; border-bottom: 1px solid #2a333d; background: #0f151b;
+            color: #e6edf3; padding: 9px 12px; font: inherit; font-size: 13.5px;
+        }
+        .srp-search:focus { outline: none; }
+        .srp-list { list-style: none; margin: 0; padding: 4px; max-height: 210px; overflow: auto; }
+        .srp-opt {
+            display: flex; align-items: center; gap: 9px; width: 100%;
+            background: none; border: 0; color: #dfe7ee; padding: 7px 9px; border-radius: 7px;
+            font: inherit; font-size: 13px; cursor: pointer; text-align: left;
+        }
+        .srp-opt:hover, .srp-opt[aria-selected="true"] { background: rgba(255,255,255,.06); }
+        .srp-opt .srp-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .srp-opt .srp-code { color: #8fa2b1; font-size: 10.5px; }
+        .srp-flag { width: 20px; height: 15px; object-fit: cover; border-radius: 2px; box-shadow: 0 0 0 1px rgba(255,255,255,.15); flex: 0 0 20px; }
+        .srp-empty { padding: 10px; color: #8fa2b1; font-size: 12px; }
+
+        .srp-error { margin: 0; font-size: 12px; color: #e5a93b; }
+        .srp-error[hidden] { display: none; }
+
+        .srp-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 2px; }
         .srp-btn {
-            border: 1px solid transparent; border-radius: 7px; padding: 7px 12px;
+            border: 1px solid transparent; border-radius: 9px; padding: 8px 14px;
             background: #ff913c; color: #171108; font: inherit; font-weight: 700; cursor: pointer;
         }
+        .srp-btn:disabled { opacity: .45; cursor: not-allowed; }
         .srp-btn.ghost { background: transparent; border-color: #3d4a58; color: #dfe7ee; font-weight: 500; }
-        .srp-error { color: #e5a93b; font-size: 11.5px; margin: 6px 0 0; }
     `);
 
     const appIdMatch = window.location.pathname.match(/\/app\/(\d+)/);
@@ -350,69 +415,309 @@
     // 3. RÉGLAGES EN PAGE (secours si les paramètres d'installation n'ont pas suivi)
     const NEEDS_SETUP = !STORED && !PARAMS.key && !PARAMS.gg && !PARAMS.steam
         && (!GG_DEALS_API_KEY || GG_DEALS_API_KEY === 'VOTRE_CLE_API_ICI');
+    // --- pays (mêmes listes que la modale du site) ---
+    const ISO_CODES = (
+        'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ ' +
+        'CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR ' +
+        'GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP ' +
+        'KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT ' +
+        'MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW ' +
+        'SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG ' +
+        'UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW XK'
+    ).split(' ');
+
+    const UI = LOCALE === 'fr' ? {
+        title: 'Réglages — prix Steam & prix des clés',
+        notice: 'Aucune configuration détectée : renseignez-la une fois, elle restera sur votre machine.',
+        hint: 'Valeurs enregistrées par le gestionnaire de userscripts, sur votre machine.',
+        keyLabel: 'Clé API GG.deals (gg.deals/api)',
+        keyHint: 'Clé gratuite sur gg.deals/api · facultative : le badge 🔑 vous la redemandera',
+        ggRegion: 'Région GG.deals (prix des clés)',
+        steamRegion: 'Région Steam (prix boutique)',
+        showSteam: 'Prix Steam',
+        showKeys: 'Prix des clés',
+        search: 'Rechercher un pays…',
+        oneRequired: 'Gardez au moins une des deux parties active.',
+        cancel: 'Annuler',
+        save: 'Enregistrer'
+    } : {
+        title: 'Settings — Steam price & key price',
+        notice: 'No configuration found: set it once, it stays on your machine.',
+        hint: 'Stored by your userscript manager, on your machine.',
+        keyLabel: 'GG.deals API key (gg.deals/api)',
+        keyHint: 'Free key on gg.deals/api · optional: the 🔑 badge will ask again',
+        ggRegion: 'GG.deals region (key prices)',
+        steamRegion: 'Steam region (store price)',
+        showSteam: 'Steam price',
+        showKeys: 'Key price',
+        search: 'Search a country…',
+        oneRequired: 'Keep at least one of the two sections enabled.',
+        cancel: 'Cancel',
+        save: 'Save'
+    };
+
+    const foldText = v => String(v).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const flagUrl = code => 'https://flagcdn.com/w20/' + String(code).toLowerCase() + '.png';
+
+    function countryName(code) {
+        const up = String(code || '').toUpperCase();
+        try {
+            return new Intl.DisplayNames([LOCALE === 'fr' ? 'fr' : 'en'], { type: 'region' }).of(up) || up;
+        } catch (e) {
+            return up;
+        }
+    }
+
+    function flagIcon(code) {
+        const img = document.createElement('img');
+        img.className = 'srp-flag';
+        img.alt = '';
+        img.loading = 'lazy';
+        img.src = flagUrl(code);
+        img.addEventListener('error', () => img.remove(), { once: true });
+        return img;
+    }
+
+    function makeCountryPicker(initial) {
+        const wrap = document.createElement('div');
+        wrap.className = 'srp-picker';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'srp-picker-btn';
+        button.setAttribute('aria-haspopup', 'listbox');
+
+        const panel = document.createElement('div');
+        panel.className = 'srp-picker-panel';
+        panel.hidden = true;
+
+        const search = document.createElement('input');
+        search.type = 'search';
+        search.className = 'srp-search';
+        search.placeholder = UI.search;
+
+        const list = document.createElement('ul');
+        list.className = 'srp-list';
+        list.setAttribute('role', 'listbox');
+
+        let value = String(initial || '').toLowerCase();
+
+        const paintButton = () => {
+            button.textContent = '';
+            const code = document.createElement('span');
+            code.className = 'srp-code';
+            code.textContent = value.toUpperCase();
+            button.append(flagIcon(value), document.createTextNode(countryName(value)), code);
+        };
+
+        const paintList = filter => {
+            const q = foldText(String(filter || '').trim());
+            list.textContent = '';
+            const frag = document.createDocumentFragment();
+            let found = 0;
+
+            ISO_CODES.forEach(code => {
+                const name = countryName(code);
+                if (q && foldText(name).indexOf(q) < 0 && code.toLowerCase().indexOf(q) < 0) return;
+
+                const li = document.createElement('li');
+                const opt = document.createElement('button');
+                opt.type = 'button';
+                opt.className = 'srp-opt';
+                opt.setAttribute('role', 'option');
+                opt.setAttribute('aria-selected', String(code.toLowerCase() === value));
+
+                const nameEl = document.createElement('span');
+                nameEl.className = 'srp-name';
+                nameEl.textContent = name;
+
+                const codeEl = document.createElement('span');
+                codeEl.className = 'srp-code';
+                codeEl.textContent = code;
+
+                opt.append(flagIcon(code), nameEl, codeEl);
+                opt.addEventListener('click', () => {
+                    value = code.toLowerCase();
+                    paintButton();
+                    panel.hidden = true;
+                    button.focus();
+                });
+
+                li.append(opt);
+                frag.append(li);
+                found++;
+            });
+
+            if (!found) {
+                const li = document.createElement('li');
+                li.className = 'srp-empty';
+                li.textContent = '—';
+                frag.append(li);
+            }
+            list.append(frag);
+        };
+
+        button.addEventListener('click', () => {
+            const willOpen = panel.hidden;
+            document.querySelectorAll('.srp-picker-panel').forEach(p => { p.hidden = true; });
+            panel.hidden = !willOpen;
+            if (willOpen) {
+                search.value = '';
+                paintList('');
+                search.focus();
+            }
+        });
+        search.addEventListener('input', () => paintList(search.value));
+
+        panel.append(search, list);
+        wrap.append(button, panel);
+        paintButton();
+
+        return {
+            el: wrap,
+            button,
+            get value() { return value; }
+        };
+    }
+
     function openSettings(notice) {
         if (document.querySelector('.srp-overlay')) return;
 
         const overlay = document.createElement('div');
         overlay.className = 'srp-overlay';
-        overlay.innerHTML = `
-            <form class="srp-box">
-                <h3>Réglages — prix Steam & prix des clés</h3>
-                <p>${notice ? 'Aucune configuration détectée : renseignez-la une fois, elle restera sur votre machine.' : 'Valeurs enregistrées par le gestionnaire de userscripts, sur votre machine.'}</p>
-                <label>Clé API GG.deals (gg.deals/api)
-                    <input type="text" name="key" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
-                </label>
-                <div class="srp-row">
-                    <label>Région GG.deals
-                        <input type="text" name="ggRegion" maxlength="2" placeholder="fr">
-                    </label>
-                    <label>Région Steam
-                        <input type="text" name="steamRegion" maxlength="2" placeholder="ar">
-                    </label>
-                </div>
-                <div class="srp-row">
-                    <label class="srp-check"><input type="checkbox" name="showSteam"> Prix Steam</label>
-                    <label class="srp-check"><input type="checkbox" name="showKeys"> Prix des clés</label>
-                </div>
-                <div class="srp-actions">
-                    <button type="button" class="srp-btn ghost" data-act="cancel">Annuler</button>
-                    <button type="submit" class="srp-btn">Enregistrer</button>
-                </div>
-            </form>
-        `;
 
-        const form = overlay.querySelector('form');
-        form.key.value = CONF.key === 'VOTRE_CLE_API_ICI' ? '' : CONF.key;
-        form.ggRegion.value = CONF.ggRegion;
-        form.steamRegion.value = CONF.steamRegion;
-        form.showSteam.checked = !!CONF.showSteam;
-        form.showKeys.checked = !!CONF.showKeys;
+        const box = document.createElement('form');
+        box.className = 'srp-box';
+
+        const title = document.createElement('h3');
+        title.textContent = UI.title;
+
+        const intro = document.createElement('p');
+        intro.className = 'srp-intro';
+        intro.textContent = notice ? UI.notice : UI.hint;
+
+        // --- interrupteurs ---
+        const switches = document.createElement('div');
+        switches.className = 'srp-switches';
+
+        const mkSwitch = (labelText, checked) => {
+            const label = document.createElement('label');
+            label.className = 'srp-switch';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = checked;
+            const span = document.createElement('span');
+            span.textContent = labelText;
+            label.append(input, span);
+            return { label, input };
+        };
+
+        const swSteam = mkSwitch(UI.showSteam, !!CONF.showSteam);
+        const swKeys = mkSwitch(UI.showKeys, !!CONF.showKeys);
+        switches.append(swSteam.label, swKeys.label);
+
+        // --- clé API ---
+        const keyField = document.createElement('label');
+        keyField.className = 'srp-field';
+        const keyCaption = document.createElement('span');
+        keyCaption.textContent = UI.keyLabel;
+        keyField.append(keyCaption);
+        const keyInput = document.createElement('input');
+        keyInput.type = 'text';
+        keyInput.autocomplete = 'off';
+        keyInput.spellcheck = false;
+        keyInput.placeholder = 'AbCdEf123456';
+        keyInput.value = CONF.key === 'VOTRE_CLE_API_ICI' ? '' : CONF.key;
+        keyField.append(keyInput);
+
+        const keyHint = document.createElement('p');
+        keyHint.className = 'srp-hint';
+        keyHint.textContent = UI.keyHint;
+
+        // --- régions ---
+        const row = document.createElement('div');
+        row.className = 'srp-row';
+
+        const fieldGG = document.createElement('div');
+        fieldGG.className = 'srp-field';
+        const capGG = document.createElement('span');
+        capGG.textContent = UI.ggRegion;
+        const pickerGG = makeCountryPicker(CONF.ggRegion);
+        fieldGG.append(capGG, pickerGG.el);
+
+        const fieldSteam = document.createElement('div');
+        fieldSteam.className = 'srp-field';
+        const capSteam = document.createElement('span');
+        capSteam.textContent = UI.steamRegion;
+        const pickerSteam = makeCountryPicker(CONF.steamRegion);
+        fieldSteam.append(capSteam, pickerSteam.el);
+
+        row.append(fieldGG, fieldSteam);
+
+        const warning = document.createElement('p');
+        warning.className = 'srp-error';
+        warning.hidden = true;
+        warning.textContent = UI.oneRequired;
+
+        // --- actions ---
+        const actions = document.createElement('div');
+        actions.className = 'srp-actions';
+
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'srp-btn ghost';
+        cancel.textContent = UI.cancel;
+
+        const save = document.createElement('button');
+        save.type = 'submit';
+        save.className = 'srp-btn';
+        save.textContent = UI.save;
+
+        actions.append(cancel, save);
+
+        const refreshToggles = () => {
+            const steamOn = swSteam.input.checked;
+            const keysOn = swKeys.input.checked;
+
+            keyField.classList.toggle('srp-off', !keysOn);
+            fieldGG.classList.toggle('srp-off', !keysOn);
+            fieldSteam.classList.toggle('srp-off', !steamOn);
+
+            keyInput.disabled = !keysOn;
+            pickerGG.button.disabled = !keysOn;
+            pickerSteam.button.disabled = !steamOn;
+
+            warning.hidden = !!(steamOn || keysOn);
+            warning.classList.toggle('srp-error-visible', !steamOn && !keysOn);
+            save.disabled = !steamOn && !keysOn;
+        };
+
+        swSteam.input.addEventListener('change', refreshToggles);
+        swKeys.input.addEventListener('change', refreshToggles);
 
         overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-        form.querySelector('[data-act="cancel"]').addEventListener('click', () => overlay.remove());
+        cancel.addEventListener('click', () => overlay.remove());
+        document.addEventListener('keydown', function onEsc(e) {
+            if (e.key !== 'Escape') return;
+            document.removeEventListener('keydown', onEsc, true);
+            overlay.remove();
+        }, true);
 
-        form.addEventListener('submit', e => {
+        box.addEventListener('submit', e => {
             e.preventDefault();
-            const showSteam = form.showSteam.checked;
-            const showKeys = form.showKeys.checked;
-            const err = form.querySelector('.srp-error') || document.createElement('p');
 
+            const showSteam = swSteam.input.checked;
+            const showKeys = swKeys.input.checked;
             if (!showSteam && !showKeys) {
-                err.className = 'srp-error';
-                err.textContent = 'Gardez au moins une des deux parties active.';
-                form.append(err);
+                warning.hidden = false;
                 return;
             }
 
-            const norm = v => String(v || '').trim().toLowerCase().slice(0, 2).replace(/[^a-z]/g, '');
-            const ggRegion = norm(form.ggRegion.value) || 'fr';
-            const steamRegion = norm(form.steamRegion.value) || 'ar';
-
             if (typeof GM_setValue === 'function') {
                 GM_setValue(STORED_KEY, {
-                    key: form.key.value.trim(),
-                    ggRegion,
-                    steamRegion,
+                    key: keyInput.value.trim(),
+                    ggRegion: pickerGG.value,
+                    steamRegion: pickerSteam.value,
                     showSteam,
                     showKeys
                 });
@@ -420,8 +725,11 @@
             location.reload();
         });
 
+        box.append(title, intro, switches, keyField, keyHint, row, warning, actions);
+        overlay.append(box);
         document.body.append(overlay);
-        form.key.focus();
+        refreshToggles();
+        keyInput.focus();
     }
 
     function addSettingsBadge(container) {
