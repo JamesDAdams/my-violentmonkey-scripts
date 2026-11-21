@@ -8,6 +8,10 @@ Click the green button on a Discord invite page and the invite is sent to the Di
 
 <img src="screenshots/invite.png" width="320" alt="Discord invite page with the green “Send to my Discord tab” button under Create Account">
 
+## Install
+
+[<img src="https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/assets/install-en.svg" width="96" height="28" alt="Install Discord Web Invite">](https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/discord-invite-tab/discord-web-invite.user.js)
+
 ## What it adds
 
 On `discord.com/invite/…` and `discord.gg/…`, a button **“Send to my Discord tab”** — or **« Envoyer vers mon onglet Discord »** depending on the browser language — appears right under the “Create Account” submit button.
@@ -15,32 +19,22 @@ On `discord.com/invite/…` and `discord.gg/…`, a button **“Send to my Disco
 Clicking it:
 
 1. stores the invite code in the userscript storage (`GM_setValue`);
-2. focuses the Discord tab you already have open (it names itself `discord_main_tab`).
+2. the Discord tab you already have open reads it (a lookup every 1.5 s with `GM_getValue`), clears the value, then navigates to `/invite/{code}` and takes focus.
 
-That tab listens for the storage change (`GM_addValueChangeListener`), navigates to `/invite/{code}` and takes focus — Discord then shows its usual “join server” screen, logged in as you.
+Discord then shows its usual “join server” screen, logged in as you. No network request other than Discord itself, no second session, no login screen.
 
-## Installation
+> If the button seems to do nothing, reload the tab where Discord is already open once: a tab loaded before the script was installed does not have the listener yet.
 
-[**Install the script**](https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/discord-invite-tab/discord-web-invite.user.js) — or copy [`discord-web-invite.user.js`](discord-web-invite.user.js) into Violentmonkey.
+## Limits
 
-Header fields:
-
-```js
-// @match    *://discord.com/*
-// @match    *://discord.gg/*
-// @grant    GM_setValue
-// @grant    GM_addValueChangeListener
-// @grant    window.focus
-```
-
-## Requirements and limits
-
-- A Discord tab must already be open **and logged in**, and opened *after* the script was installed — that is when it takes the `discord_main_tab` name.
-- The two GM storage APIs are required: a `@grant none` fork cannot communicate between tabs.
-- The invite page is a React app, so the button is inserted by a `MutationObserver` just below the submit button; it appears a moment after the page.
-- If no Discord tab answers, the button simply switches to “Sent” — nothing breaks.
-- The button label follows the browser language: French (“Envoyer vers mon onglet Discord”) or English (“Send to my Discord tab”).
+- The script only works on `discord.com` and `discord.gg`.
+- The invite is stored for 3 minutes: an invitation sent while no Discord tab is open is ignored.
+- If the Discord page changes its account block, the button may need a page refresh to appear.
 
 ## Privacy
 
-No network request: the invite code travels from one tab to the other through the userscript manager’s storage. No analytics, no external service.
+Everything stays in your browser: the invite code is written to the userscript storage (`GM_setValue`), read once by your Discord tab and cleared. No external server, no analytics.
+
+---
+
+Website: <https://script.jamesserver.fr/#discord-invite-tab>

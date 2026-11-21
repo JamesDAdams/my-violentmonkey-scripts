@@ -12,29 +12,26 @@ Les lignes de DLC reçoivent les deux mêmes badges.
 ![Encart d'achat Steam avec le badge de prix des clés et le badge de prix régional](screenshots/prix-cle.png)
 
 
-## Configuration
+## Installation
 
-Le script a besoin de trois valeurs, à définir en tête de fichier :
+[<img src="https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/assets/install-fr.svg" width="96" height="28" alt="Installer Steam — Prix de la région + prix des clés">](https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/steam-region-price.user.js)
 
-| Réglage | À quoi ça sert | Exemple |
+## Réglages
+
+Tout se règle **dans le script**, sur une fiche de jeu Steam : un panneau de réglages s'ouvre automatiquement au premier lancement, et le badge **⚙** à côté des badges de prix le rouvre à tout moment.
+
+| Champ | Ce que c'est | Exemple |
 | --- | --- | --- |
-| `GG_DEALS_API_KEY` | votre clé API GG.deals, gratuite ([gg.deals/api](https://gg.deals/api/)) | `AbCdEf123456` |
-| `GG_DEALS_REGION` | pays/région utilisés pour les prix des **clés** (devise) | `fr` |
-| `STEAM_REGION` | pays dont on veut voir le **prix Steam** | `ar`, `tr`, `us`… |
-| `SHOW_STEAM_REGION` | afficher le badge de prix Steam | `true` |
-| `SHOW_GGDEALS` | afficher le badge de prix des clés | `true` |
+| **Clé API** | votre clé GG.deals gratuite ([gg.deals/api](https://gg.deals/api/)) — obligatoire si « Prix des clés » est actif | `AbCdEf123456` |
+| **Région GG.deals** | pays/région utilisé pour le **prix des clés** (devise) | France `fr` |
+| **Région Steam** | pays dont on veut voir le **prix Steam** | Argentine `ar`, Turquie `tr`, États-Unis `us`… |
+| **Prix Steam / Prix des clés** | afficher ou masquer chaque badge | les deux |
 
-Les deux parties se désactivent indépendamment, **mais pas les deux en même temps** : sans aucune des deux le script n'afficherait rien, donc l'installeur le bloque (et le script retombe sur le prix Steam).
+Les deux parties se désactivent indépendamment, **mais pas les deux en même temps** : sans aucune des deux le script n'afficherait rien, donc le panneau refuse d'enregistrer.
 
-**Recommandé : passez par l'installeur du site** — <https://script.jamesserver.fr/#steam-region-price> — une fenêtre demande les valeurs (listes de pays avec drapeaux et recherche), puis **installe le script directement**, comme les autres boutons d'installation : le gestionnaire intercepte une URL `*.user.js` qui porte vos valeurs en paramètres, et le script les relit à l'exécution via `GM_info.script.downloadURL`. Rien n'est envoyé à un serveur ; les valeurs ne vivent que dans l'URL d'installation du script, sur votre machine. Un lien « Télécharger une copie » reste disponible.
+Le panneau enregistre les valeurs avec `GM_setValue`, sur votre machine — rien n'est envoyé à un serveur, la clé ne quitte jamais votre ordinateur.
 
-### Si les valeurs de l'installeur n'ont pas suivi
-
-Certains gestionnaires ne conservent pas l'URL d'installation. Sur une fiche de jeu, cliquez sur le badge **⚙** à côté des badges de prix : un panneau s'ouvre (clé, les deux régions, les deux interrupteurs) et enregistre les valeurs avec `GM_setValue`, sur votre machine. La console affiche la configuration utilisée au démarrage : `[Steam region] configuration (paramètres d'installation | réglages enregistrés | valeurs du fichier)`.
-
-Le lien **« Télécharger une copie »** de l'installeur fait l'inverse : il écrit vos valeurs directement dans les constantes du fichier.
-
-**Ou à la main :** ouvrez le script dans Violentmonkey et modifiez les trois constantes :
+Vous pouvez aussi modifier les constantes en tête du fichier :
 
 ```js
 const GG_DEALS_API_KEY = 'VOTRE_CLE_API_ICI';
@@ -44,12 +41,12 @@ const SHOW_STEAM_REGION = true;
 const SHOW_GGDEALS = true;
 ```
 
-Sans clé API, le badge clé affiche « Clé API requise » et renvoie vers la page GG.deals ; le badge de prix Steam continue de fonctionner.
+Sans clé API, le badge des clés affiche « Clé API requise » et ouvre le panneau de réglages ; le badge de prix Steam continue de fonctionner.
 
 ## Fonctionnement
 
-- Prix Steam : requête `GM_xmlhttpRequest` vers `store.steampowered.com/api/{appdetails|packagedetails}?cc=<STEAM_REGION>` pour chaque option d'achat (`input[name=subid]`) et chaque ligne de DLC.
-- Prix clé : `api.gg.deals/v1/prices/by-steam-app-id` avec votre clé et `region=<GG_DEALS_REGION>`, puis le plus bas des prix keyshop / officiel.
+- Prix Steam : `GM_xmlhttpRequest` vers `store.steampowered.com/api/{appdetails|packagedetails}?cc=<région Steam>` pour chaque option d'achat (`input[name=subid]`) et chaque ligne de DLC.
+- Prix des clés : `api.gg.deals/v1/prices/by-steam-app-id` avec votre clé et `region=<région GG.deals>`, puis le plus bas entre boutiques de clés et prix revendeur.
 - Les badges sont insérés au début de `.game_purchase_action_bg` et `.game_area_dlc_price` ; les démos (`demo_above_purchase`) sont ignorées.
 - Les libellés suivent la langue du navigateur (français ou anglais) ; le drapeau et le nom du pays sont déduits du code ISO.
 

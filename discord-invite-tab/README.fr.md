@@ -1,45 +1,40 @@
-[English](README.md) · **Français**
+**Français** · [English](README.md)
 
-# Discord Web Invite — Onglet existant
+# Discord Web Invite — Ouvrir dans l'onglet existant
 
-Un clic sur le bouton vert d'une page d'invitation Discord envoie l'invitation à l'onglet Discord déjà ouvert dans le navigateur — pas de seconde session, pas d'écran de connexion.
+Cliquez sur le bouton vert d'une page d'invitation Discord : l'invitation part vers l'onglet Discord déjà ouvert dans votre navigateur — pas de seconde session, pas d'écran de connexion.
 
 ## Aperçu
 
-<img src="screenshots/invite.png" width="320" alt="Page d'invitation Discord avec le bouton vert « Envoyer vers mon onglet Discord »">
-
-## Ce que ça ajoute
-
-Sur `discord.com/invite/…` et `discord.gg/…`, un bouton **« Envoyer vers mon onglet Discord »** — ou **“Send to my Discord tab”** selon la langue du navigateur — apparaît juste sous le bouton d'envoi « Create Account ».
-
-Au clic :
-
-1. le code d'invitation est stocké dans le stockage du gestionnaire de userscripts (`GM_setValue`) ;
-2. le focus passe à l'onglet Discord déjà ouvert (il s'est nommé `discord_main_tab`).
-
-Cet onglet écoute la modification (`GM_addValueChangeListener`), ouvre `/invite/{code}` et reprend le focus — Discord affiche alors son écran habituel « rejoindre le serveur », avec votre session.
+<img src="screenshots/invite.png" width="320" alt="Page d'invitation Discord avec le bouton vert « Envoyer vers mon onglet Discord » sous Create Account">
 
 ## Installation
 
-[**Installer le script**](https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/discord-invite-tab/discord-web-invite.user.js) — ou copier [`discord-web-invite.user.js`](discord-web-invite.user.js) dans Violentmonkey.
+[<img src="https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/assets/install-fr.svg" width="96" height="28" alt="Installer Discord Web Invite">](https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/discord-invite-tab/discord-web-invite.user.js)
 
-Champs de l'en-tête :
+## Ce qu'il ajoute
 
-```js
-// @match    *://discord.com/*
-// @match    *://discord.gg/*
-// @grant    GM_setValue
-// @grant    GM_addValueChangeListener
-// @grant    window.focus
-```
+Sur `discord.com/invite/…` et `discord.gg/…`, un bouton **« Envoyer vers mon onglet Discord »** — ou **“Send to my Discord tab”** selon la langue du navigateur — apparaît juste sous le bouton « Create Account ».
 
-## Prérequis et limites
+En cliquant dessus :
 
-- Un onglet Discord doit déjà être ouvert **et connecté**, et ouvert *après* l'installation du script — c'est là qu'il prend le nom `discord_main_tab`.
-- Les deux API de stockage GM sont indispensables : un fork en `@grant none` ne peut pas communiquer entre onglets.
-- La page d'invitation est une application React : le bouton est inséré par un `MutationObserver` sous le bouton d'envoi, donc il apparaît un instant après le chargement.
-- Si aucun onglet Discord ne répond, le bouton passe simplement à « Envoyé » — rien ne casse.
+1. le code d'invitation est déposé dans le stockage du gestionnaire (`GM_setValue`) ;
+2. l'onglet Discord déjà ouvert le lit (vérification toutes les 1,5 s avec `GM_getValue`), efface la valeur, puis navigue vers `/invite/{code}` et reprend le focus.
+
+Discord affiche alors son écran « rejoindre le serveur », déjà connecté. Aucune requête réseau en dehors de Discord, pas de seconde session, pas d'écran de connexion.
+
+> Si le bouton semble ne rien faire, rechargez une fois l'onglet où Discord est déjà ouvert : un onglet chargé avant l'installation du script n'a pas encore l'écouteur.
+
+## Limites
+
+- Le script ne fonctionne que sur `discord.com` et `discord.gg`.
+- L'invitation est conservée 3 minutes : une invitation envoyée sans onglet Discord ouvert est ignorée.
+- Si Discord change son bloc de connexion, un rafraîchissement de la page peut être nécessaire pour voir le bouton.
 
 ## Vie privée
 
-Aucune requête réseau : le code d'invitation circule d'un onglet à l'autre via le stockage du gestionnaire de userscripts. Pas d'analyse, pas de service tiers.
+Tout reste dans votre navigateur : le code d'invitation est écrit dans le stockage du gestionnaire (`GM_setValue`), lu une fois par votre onglet Discord puis effacé. Aucun serveur externe, aucune analyse.
+
+---
+
+Site : <https://script.jamesserver.fr/#discord-invite-tab>

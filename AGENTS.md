@@ -54,8 +54,10 @@ Every script gets one `<article class="panel" id="panel-<id>">` in
    from it at runtime).
 
 The Install button text is **`Install` / `Installer`** — never
-`Configure & install`. When the script needs settings, the button opens the
-configuration dialog and the dialog starts the installation.
+`Configure & install` — and it is a **plain link to the raw `.user.js`**, like
+every other script. The site has **no configuration dialog**: a script that
+needs settings configures itself, in its own settings panel (`⚙` badge on the
+target site, opened automatically on first use).
 
 The left menu lists every script; clicking an entry shows its panel on the
 right (hash routing, e.g. `#steam-region-price`). The selected entry is
@@ -83,17 +85,24 @@ Root listing (`README.md` / `README.fr.md`):
 - a table with **three columns**: `Script` · `What it does` · `Installation`;
 - the script name is a link to its folder; the description cell also holds the
   screenshot; there is **no separate folder column**;
+- **every row carries the screenshot** of its script in the description cell
+  (`<br><br><img src="<script>/screenshots/…" width="180-260">`), next to the
+  text — never a row without an image;
 - the `Installation` cell holds the install button image
-  (`assets/install-en.svg` or `assets/install-fr.svg`, 96×28) linked to the
-  script (raw `.user.js` or the website panel when a configuration is needed);
+  (`assets/install-en.svg` or `assets/install-fr.svg`, 96×28) linked to the raw
+  `.user.js`;
 - no “install” / “update” section: the table is the entry point.
 
 Per-script README:
 
 - title, one-sentence pitch, then **the screenshot near the top**;
+- an **`## Install` / `## Installation` section with the install button**
+  (`assets/install-en.svg` / `install-fr.svg`, 96×28) linking to the raw
+  `.user.js` — every script README has one, like the root table;
 - what the badges/features do, in the order the user sees them;
-- a settings table with the exact constant names, default values and accepted
-  values (`fr`, `ar`, `us`…);
+- a `## Settings` / `## Réglages` section: how to open the in-script panel and a
+  table of the fields with their accepted values (`fr`, `ar`, `us`…), plus the
+  equivalent constants for a manual edit;
 - the privacy statement: nothing is sent to a server, values stay on the
   machine (browser storage or the file itself);
 - a link back to `https://script.jamesserver.fr/#<script-id>`.
@@ -131,8 +140,9 @@ Per-script README:
 
 - `node --check` on every JS file touched (`docs/app.js` and the userscripts).
 - Open the site with Playwright (`channel: 'chrome'`) and check: the panel of the
-  script shows the screenshot at the top, the Install button works, the dialog
-  validates, no console error.
+  script shows the screenshot at the top, the Install button links to the raw
+  `.user.js`, no console error. The settings panel of a userscript is tested on
+  the real target site (Playwright, `channel: 'chrome'`, GM stubs).
 - After `git push`, wait for the Pages build
   (`gh api repos/JamesDAdams/my-violentmonkey-scripts/pages/builds/latest`)
   and for the raw CDN (`max-age=300`) before announcing a new version.

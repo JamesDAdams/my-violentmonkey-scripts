@@ -153,7 +153,7 @@
         </ul>
 
         <div class="actions">
-          <button type="button" class="btn" id="install-region" data-i18n="region.configure">Install</button>
+          <a class="btn" id="install-region" href="https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/steam-region-price.user.js" data-i18n="region.configure">Install</a>
           <a class="btn ghost" href="https://github.com/JamesDAdams/my-violentmonkey-scripts/tree/main/steam-region-price" data-i18n="details">Details</a>
         </div>
 
@@ -175,67 +175,6 @@
   </main>
 
 </div>
-
-<dialog id="config-dialog" class="config" aria-labelledby="cfg-title">
-  <form class="config-box" id="config-form" novalidate>
-    <h2 id="cfg-title" data-i18n="cfg.title">Configure the script</h2>
-    <p class="config-sub" data-i18n="cfg.sub">Three values, then the script is generated for you.</p>
-
-    <div class="switches">
-      <label class="switch">
-        <input type="checkbox" id="cfg-on-steam" checked>
-        <span data-i18n="cfg.onSteam">Steam price</span>
-      </label>
-      <label class="switch">
-        <input type="checkbox" id="cfg-on-gg" checked>
-        <span data-i18n="cfg.onKeys">GG.deals key price</span>
-      </label>
-    </div>
-    <p class="toggle-warn" id="cfg-toggle-warn" hidden data-i18n="cfg.oneRequired">Keep at least one of the two sections enabled.</p>
-
-    <div class="field" id="field-key">
-      <label for="cfg-key" data-i18n="cfg.key">GG.deals API key</label>
-      <div class="key-row">
-        <input id="cfg-key" type="password" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
-        <button type="button" class="key-eye" id="cfg-key-eye" aria-label="Show the key" title="Show the key">👁</button>
-      </div>
-      <p class="hint">
-        <span data-i18n="cfg.keyHint">Required to show the key price.</span>
-        <a href="https://gg.deals/api/" target="_blank" rel="noopener" data-i18n="cfg.keyLink">Generate a free key on GG.deals</a>
-      </p>
-      <p class="toggle-warn" id="cfg-key-warn" hidden data-i18n="cfg.keyRequired">Enter an API key: it is required to show the key price.</p>
-    </div>
-
-    <div class="field" id="field-region">
-      <label id="cfg-region-label" data-i18n="cfg.region">GG.deals region (key prices)</label>
-      <div class="picker" id="picker-region"></div>
-    </div>
-
-    <div class="field" id="field-steam">
-      <label id="cfg-steam-label" data-i18n="cfg.steam">Steam region (store price)</label>
-      <div class="picker" id="picker-steam"></div>
-    </div>
-
-    <p class="privacy" data-i18n="cfg.privacy">Nothing is stored by this site: no server, no database, no cookie. The script is generated in your browser and downloaded to your computer — your key never leaves it.</p>
-
-    <div class="config-actions" id="cfg-actions">
-      <button type="button" class="btn ghost" data-close data-i18n="cfg.cancel">Cancel</button>
-      <button type="submit" class="btn" id="cfg-generate" data-i18n="cfg.generate">Generate the script</button>
-    </div>
-
-    <div class="config-result" id="cfg-result" hidden>
-      <p id="cfg-result-text"></p>
-      <p class="hint" id="cfg-result-hint"></p>
-      <div class="config-actions">
-        <a class="btn ghost" id="cfg-open-install" href="#" target="_blank" rel="noopener"></a>
-        <a class="btn ghost" id="cfg-download" href="#"></a>
-        <button type="button" class="btn ghost" id="cfg-copy" data-i18n="cfg.copy">Copy the code</button>
-        <button type="button" class="btn" data-close data-i18n="cfg.close">Close</button>
-      </div>
-    </div>
-  </form>
-</dialog>
-
 <script src="app.js?v=14"></script>
 <script>
   // Filet de sécurité : si app.js vient d'un cache trop ancien, on recharge une copie fraîche.
