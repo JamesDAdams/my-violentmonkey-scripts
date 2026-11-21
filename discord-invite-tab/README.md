@@ -18,12 +18,15 @@ On `discord.com/invite/…` and `discord.gg/…`, a button **“Send to my Disco
 
 Clicking it:
 
-1. stores the invite code in the userscript storage (`GM_setValue`);
-2. the Discord tab you already have open reads it (a lookup every 1.5 s with `GM_getValue`), clears the value, then navigates to `/invite/{code}` and takes focus.
+1. stores the invite code in the userscript storage (`GM_setValue`) and shows **“Sending to your Discord tab…”**;
+2. the Discord tab you already have open reads it (a lookup every second with `GM_getValue`), acknowledges it, clears the value and navigates to `/invite/{code}`;
+3. the button then turns **“Sent! Go back to your Discord tab”**.
 
-Discord then shows its usual “join server” screen, logged in as you. No network request other than Discord itself, no second session, no login screen.
+Discord shows its usual “join server” screen, logged in as you. No network request other than Discord itself, no second session, no login screen.
 
-> If the button seems to do nothing, reload the tab where Discord is already open once: a tab loaded before the script was installed does not have the listener yet.
+**If no Discord tab answers within 2.5 s** (none open, or a tab loaded before the script was installed), the invite is opened **in a new tab** instead and the button says so — the click always does something.
+
+> After installing or updating the script, reload the tab where Discord is already open once: a tab loaded before the installation does not run the new version yet.
 
 ## Limits
 
