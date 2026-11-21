@@ -374,6 +374,8 @@ dialog.config {
   width: calc(100vw - 32px);
 }
 dialog.config::backdrop { background: rgba(5, 8, 11, .68); backdrop-filter: blur(3px); }
+dialog.config[open] { position: fixed; inset: 0; margin: auto; z-index: 1000; }
+html.dialog-fallback::before { content: ""; position: fixed; inset: 0; background: rgba(5, 8, 11, .68); z-index: 999; }
 
 .config-box {
   background: linear-gradient(165deg, #1c232d, #171d25);

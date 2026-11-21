@@ -1,6 +1,8 @@
 /* Page statique : menu latéral, bascule FR/EN, version lue dans le script. */
 (() => {
   'use strict';
+  if (window.__mvReady) return;   // évite une double initialisation
+  window.__mvReady = true;
 
   const I18N = {
     en: {
@@ -334,16 +336,31 @@
     makePicker(document.getElementById('picker-region'), region, v => { region = v; });
     makePicker(document.getElementById('picker-steam'), steam, v => { steam = v; });
 
-    const installBtn = document.getElementById('install-region');
-    installBtn && installBtn.addEventListener('click', () => {
+    const openDialog = () => {
+      if (dlg.open) return;
       result.hidden = true;
       actions.hidden = false;
-      dlg.showModal();
+      try {
+        if (typeof dlg.showModal === 'function') dlg.showModal();
+        else dlg.setAttribute('open', '');          // repli si showModal manque
+      } catch {
+        dlg.setAttribute('open', '');
+        document.documentElement.classList.add('dialog-fallback');
+      }
       keyInput.focus();
-    });
+    };
+    const closeDialog = () => {
+      try { if (dlg.open) dlg.close(); } catch { /* ignore */ }
+      dlg.removeAttribute('open');
+      document.documentElement.classList.remove('dialog-fallback');
+    };
 
-    dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
-    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+    const installBtn = document.getElementById('install-region');
+    installBtn && installBtn.addEventListener('click', openDialog);
+
+    dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeDialog));
+    dlg.addEventListener('click', e => { if (e.target === dlg) closeDialog(); });
+    dlg.addEventListener('close', () => document.documentElement.classList.remove('dialog-fallback'));
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
