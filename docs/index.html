@@ -7,7 +7,7 @@
 <meta name="description" content="Userscripts for Steam, Discord and the web, installed in one click with Violentmonkey or Tampermonkey.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#10151b">
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 
@@ -177,7 +177,19 @@
     <h2 id="cfg-title" data-i18n="cfg.title">Configure the script</h2>
     <p class="config-sub" data-i18n="cfg.sub">Three values, then the script is generated for you.</p>
 
-    <div class="field">
+    <div class="switches">
+      <label class="switch">
+        <input type="checkbox" id="cfg-on-steam" checked>
+        <span data-i18n="cfg.onSteam">Steam price</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="cfg-on-gg" checked>
+        <span data-i18n="cfg.onKeys">GG.deals key price</span>
+      </label>
+    </div>
+    <p class="toggle-warn" id="cfg-toggle-warn" hidden data-i18n="cfg.oneRequired">Keep at least one of the two sections enabled.</p>
+
+    <div class="field" id="field-key">
       <label for="cfg-key" data-i18n="cfg.key">GG.deals API key</label>
       <input id="cfg-key" type="text" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
       <p class="hint">
@@ -187,12 +199,12 @@
       </p>
     </div>
 
-    <div class="field">
+    <div class="field" id="field-region">
       <label id="cfg-region-label" data-i18n="cfg.region">GG.deals region (key prices)</label>
       <div class="picker" id="picker-region"></div>
     </div>
 
-    <div class="field">
+    <div class="field" id="field-steam">
       <label id="cfg-steam-label" data-i18n="cfg.steam">Steam region (store price)</label>
       <div class="picker" id="picker-steam"></div>
     </div>
@@ -214,7 +226,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 <script>
   // Filet de sécurité : si app.js vient d'un cache trop ancien, on recharge une copie fraîche.
   addEventListener('load', function () {

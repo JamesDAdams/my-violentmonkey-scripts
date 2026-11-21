@@ -18,6 +18,10 @@ Le script a besoin de trois valeurs, à définir en tête de fichier :
 | `GG_DEALS_API_KEY` | votre clé API GG.deals, gratuite ([gg.deals/api](https://gg.deals/api/)) | `AbCdEf123456` |
 | `GG_DEALS_REGION` | pays/région utilisés pour les prix des **clés** (devise) | `fr` |
 | `STEAM_REGION` | pays dont on veut voir le **prix Steam** | `ar`, `tr`, `us`… |
+| `SHOW_STEAM_REGION` | afficher le badge de prix Steam | `true` |
+| `SHOW_GGDEALS` | afficher le badge de prix des clés | `true` |
+
+Les deux parties se désactivent indépendamment, **mais pas les deux en même temps** : sans aucune des deux le script n'afficherait rien, donc l'installeur le bloque (et le script retombe sur le prix Steam).
 
 **Recommandé : passez par l'installeur du site** — <https://script.jamesserver.fr/#steam-region-price> — une fenêtre demande les trois valeurs (listes de pays avec drapeaux et recherche), puis génère le fichier avec vos valeurs. Rien n'est envoyé : le fichier est fabriqué dans votre navigateur et téléchargé.
 
@@ -27,6 +31,8 @@ Le script a besoin de trois valeurs, à définir en tête de fichier :
 const GG_DEALS_API_KEY = 'VOTRE_CLE_API_ICI';
 const GG_DEALS_REGION = 'fr';
 const STEAM_REGION = 'ar';
+const SHOW_STEAM_REGION = true;
+const SHOW_GGDEALS = true;
 ```
 
 Sans clé API, le badge clé affiche « Clé API requise » et renvoie vers la page GG.deals ; le badge de prix Steam continue de fonctionner.

@@ -18,6 +18,10 @@ The script needs three values, set at the top of the file:
 | `GG_DEALS_API_KEY` | your free GG.deals API key ([gg.deals/api](https://gg.deals/api/)) | `AbCdEf123456` |
 | `GG_DEALS_REGION` | country/region used for **key** prices (currency) | `fr` |
 | `STEAM_REGION` | country whose **Steam** price you want to see | `ar`, `tr`, `us`… |
+| `SHOW_STEAM_REGION` | show the Steam price badge | `true` |
+| `SHOW_GGDEALS` | show the GG.deals key badge | `true` |
+
+Both sections can be turned off independently, **but not at the same time**: with both disabled the script would show nothing, so the installer blocks it (and the script falls back to the Steam price).
 
 **Recommended: use the installer on the site** — <https://script.jamesserver.fr/#steam-region-price> — a dialog asks for the three values (country lists with flags and search), then generates the file with your values in it. Nothing is sent anywhere: the file is built in your browser and downloaded.
 
@@ -27,6 +31,8 @@ The script needs three values, set at the top of the file:
 const GG_DEALS_API_KEY = 'VOTRE_CLE_API_ICI';
 const GG_DEALS_REGION = 'fr';
 const STEAM_REGION = 'ar';
+const SHOW_STEAM_REGION = true;
+const SHOW_GGDEALS = true;
 ```
 
 Without an API key the key badge shows “Clé API requise” / “API key required” and links to the GG.deals API page; the Steam price badge keeps working.

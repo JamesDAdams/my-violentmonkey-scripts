@@ -33,6 +33,9 @@
       'region.f3': 'Your key and your regions stay inside the script, on your computer.',
       'region.configure': 'Configure & install',
       'region.meta': 'GG.deals API key required for key prices',
+      'cfg.onSteam': 'Steam price',
+      'cfg.onKeys': 'GG.deals key price',
+      'cfg.oneRequired': 'Keep at least one of the two sections enabled.',
       'cfg.title': 'Configure the script',
       'cfg.sub': 'Three values, then the script is generated for you.',
       'cfg.key': 'GG.deals API key',
@@ -84,6 +87,9 @@
       'region.f3': 'Votre clé et vos régions restent dans le script, sur votre ordinateur.',
       'region.configure': 'Configurer & installer',
       'region.meta': 'Clé API GG.deals requise pour les prix des clés',
+      'cfg.onSteam': 'Prix Steam',
+      'cfg.onKeys': 'Prix des clés GG.deals',
+      'cfg.oneRequired': 'Gardez au moins une des deux parties active.',
       'cfg.title': 'Configurer le script',
       'cfg.sub': 'Trois valeurs, puis le script est généré pour vous.',
       'cfg.key': 'Clé API GG.deals',
@@ -214,6 +220,8 @@
     return img;
   };
 
+  let activePickerClose = null;
+
   function makePicker(root, initial, onChange) {
     if (!root) return { refresh() {} };
     let value = initial;
@@ -286,16 +294,38 @@
       list.append(frag);
     };
 
+    function placePanel() {
+      const r = btn.getBoundingClientRect();
+      const below = innerHeight - r.bottom - 12;
+      const above = r.top - 12;
+      const up = below < 200 && above > below;
+      panel.style.position = 'fixed';
+      panel.style.left = Math.round(Math.max(8, Math.min(r.left, innerWidth - r.width - 8))) + 'px';
+      panel.style.width = Math.round(r.width) + 'px';
+      panel.style.maxHeight = Math.round(Math.min(280, Math.max(150, (up ? above : below) - 8))) + 'px';
+      if (up) {
+        panel.style.top = 'auto';
+        panel.style.bottom = Math.round(innerHeight - r.top + 6) + 'px';
+      } else {
+        panel.style.top = Math.round(r.bottom + 6) + 'px';
+        panel.style.bottom = 'auto';
+      }
+    }
+
     function openPanel() {
+      if (activePickerClose && activePickerClose !== close) activePickerClose();
+      activePickerClose = close;
       open = true;
       panel.hidden = false;
       btn.setAttribute('aria-expanded', 'true');
       search.value = '';
       paintList('');
+      placePanel();
       search.focus();
     }
     function close() {
       open = false;
+      if (activePickerClose === close) activePickerClose = null;
       panel.hidden = true;
       btn.setAttribute('aria-expanded', 'false');
     }
@@ -305,9 +335,9 @@
     document.addEventListener('click', e => {
       if (open && !root.contains(e.target)) close();
     });
-    root.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && open) { e.stopPropagation(); close(); btn.focus(); }
-    });
+    addEventListener('scroll', e => { if (open && !panel.contains(e.target)) close(); }, true);
+    addEventListener('resize', () => { if (open) placePanel(); });
+    // Échap est géré au niveau de la modale (elle ferme d'abord la liste).
 
     panel.append(search, list);
     root.append(btn, panel);
@@ -357,8 +387,38 @@
       document.documentElement.classList.remove('dialog-fallback');
     };
 
+    const onSteam = document.getElementById('cfg-on-steam');
+    const onKeys = document.getElementById('cfg-on-gg');
+    const warn = document.getElementById('cfg-toggle-warn');
+    const genBtn = document.getElementById('cfg-generate');
+    const fieldKey = document.getElementById('field-key');
+    const fieldRegion = document.getElementById('field-region');
+    const fieldSteam = document.getElementById('field-steam');
+
+    const refreshToggles = () => {
+      const bothOff = !onSteam.checked && !onKeys.checked;
+      warn.hidden = !bothOff;
+      genBtn.disabled = bothOff;
+      fieldKey.classList.toggle('is-off', !onKeys.checked);
+      fieldRegion.classList.toggle('is-off', !onKeys.checked);
+      fieldSteam.classList.toggle('is-off', !onSteam.checked);
+      keyInput.disabled = !onKeys.checked;
+      const b1 = fieldRegion.querySelector('.picker-btn');
+      const b2 = fieldSteam.querySelector('.picker-btn');
+      if (b1) b1.disabled = !onKeys.checked;
+      if (b2) b2.disabled = !onSteam.checked;
+    };
+    onSteam.addEventListener('change', refreshToggles);
+    onKeys.addEventListener('change', refreshToggles);
+    refreshToggles();
+
     const installBtn = document.getElementById('install-region');
     installBtn && installBtn.addEventListener('click', openDialog);
+
+    // Échap : ferme d'abord la liste de pays ouverte, sinon la modale
+    dlg.addEventListener('cancel', e => {
+      if (activePickerClose) { e.preventDefault(); activePickerClose(); }
+    });
 
     dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeDialog));
     // fermeture par clic sur le fond, mais pas juste après l'ouverture (double-clic sur le bouton)
@@ -367,6 +427,7 @@
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
+      if (!onSteam.checked && !onKeys.checked) { refreshToggles(); return; }
       const key = keyInput.value.trim().replace(/[^A-Za-z0-9_-]/g, '');
       result.hidden = false;
       resultText.textContent = '…';
@@ -378,7 +439,9 @@
         generated = tpl
           .replace(/(const GG_DEALS_API_KEY = )'[^']*';/, (_m, p1) => p1 + "'" + key + "';")
           .replace(/(const GG_DEALS_REGION = )'[^']*';/, (_m, p1) => p1 + "'" + region + "';")
-          .replace(/(const STEAM_REGION = )'[^']*';/, (_m, p1) => p1 + "'" + steam + "';");
+          .replace(/(const STEAM_REGION = )'[^']*';/, (_m, p1) => p1 + "'" + steam + "';")
+          .replace(/(const SHOW_STEAM_REGION = )(?:true|false);/, (_m, p1) => p1 + onSteam.checked + ';')
+          .replace(/(const SHOW_GGDEALS = )(?:true|false);/, (_m, p1) => p1 + onKeys.checked + ';');
 
         const blob = new Blob([generated], { type: 'text/javascript' });
         const url = URL.createObjectURL(blob);

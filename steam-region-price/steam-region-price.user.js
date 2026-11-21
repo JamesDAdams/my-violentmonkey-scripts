@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.0
+// @version      4.1
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
@@ -25,6 +25,10 @@
 
     // 3) Région Steam : pays dont on veut afficher le prix boutique (code pays ISO, ex. 'ar', 'tr', 'us')
     const STEAM_REGION = 'ar';
+
+    // 4) Parties affichées — on ne peut pas désactiver les deux
+    const SHOW_STEAM_REGION = true;   // prix boutique Steam (pays choisi)
+    const SHOW_GGDEALS = true;        // prix clé le moins cher (GG.deals)
     // =========================================================================
 
     const LOCALE = String(navigator.language || 'fr').toLowerCase().startsWith('fr') ? 'fr' : 'en';
@@ -235,6 +239,12 @@
     }
 
     // 3. INJECTION DANS LA PAGE
+    const showRegion = SHOW_STEAM_REGION || !SHOW_GGDEALS;
+    const showKeys = SHOW_GGDEALS;
+    if (!SHOW_STEAM_REGION && !SHOW_GGDEALS) {
+        console.warn('[Steam region] Les deux parties sont désactivées : seul le prix Steam est affiché.');
+    }
+
     let mainGameProcessed = false;
 
     document.querySelectorAll('.game_area_purchase_game_wrapper').forEach((wrapper) => {
@@ -244,9 +254,9 @@
         const actionBg = wrapper.querySelector('.game_purchase_action_bg');
 
         if (subInput && actionBg) {
-            fetchRegionPrice(subInput.value, true, actionBg);
+            if (showRegion) fetchRegionPrice(subInput.value, true, actionBg);
 
-            if (!mainGameProcessed && mainAppId) {
+            if (showKeys && !mainGameProcessed && mainAppId) {
                 mainGameProcessed = true;
                 fetchKeyshopPrice(mainAppId, actionBg);
             }
@@ -258,8 +268,8 @@
         const priceCol = row.querySelector('.game_area_dlc_price');
 
         if (dlcAppId && priceCol) {
-            fetchRegionPrice(dlcAppId, false, priceCol);
-            fetchKeyshopPrice(dlcAppId, priceCol);
+            if (showRegion) fetchRegionPrice(dlcAppId, false, priceCol);
+            if (showKeys) fetchKeyshopPrice(dlcAppId, priceCol);
         }
     });
 })();
