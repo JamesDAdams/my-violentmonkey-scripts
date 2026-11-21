@@ -1,6 +1,6 @@
-[**English**](#english) · [Français](#francais)
+**English** · [Français](#mes-scripts-violentmonkey)
 
-# <a id="english"></a>My Violentmonkey scripts
+# My Violentmonkey scripts
 
 Personal collection of userscripts for [Violentmonkey](https://violentmonkey.github.io/) (also compatible with Tampermonkey). One folder per script, each with a detailed README and screenshots.
 
@@ -12,7 +12,9 @@ Personal collection of userscripts for [Violentmonkey](https://violentmonkey.git
 
 ---
 
-# <a id="francais"></a>Mes scripts Violentmonkey
+[English](#my-violentmonkey-scripts) · **Français**
+
+# Mes scripts Violentmonkey
 
 Collection personnelle de userscripts pour [Violentmonkey](https://violentmonkey.github.io/) (compatibles Tampermonkey). Un dossier par script, avec un README détaillé et des captures d'écran.
 
