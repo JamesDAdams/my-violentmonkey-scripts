@@ -1,8 +1,9 @@
 // ==UserScript==
-// @name         Steam — Déclaration IA / AI disclosure
+// @name         Steam — AI disclosure
 // @namespace    https://store.steampowered.com/
-// @version      4.0.0
-// @description  Interface FR/EN selon le navigateur. Sur une fiche : ligne « IA » dans l'encart glance avec les usages déclarés. Ailleurs : bandeau « IA » sur les vignettes des jeux qui déclarent de l'IA. Lecture locale, cache 30 jours, 30 requêtes/min max.
+// @version      4.1.0
+// @description  Adds an "AI" row on Steam game pages and an "AI" badge on store thumbnails, based on the developer's generative-AI disclosure. Local cache, no third-party service.
+// @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-declaration-ia/icon.png
 // @match        https://store.steampowered.com/*
 // @run-at       document-idle
 // @inject-into  content

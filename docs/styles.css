@@ -106,7 +106,9 @@ a:hover { text-decoration: underline; }
 }
 
 .nav-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   text-align: left;
   font: inherit;
@@ -126,6 +128,20 @@ a:hover { text-decoration: underline; }
   border-color: rgba(255, 145, 60, .22);
   border-left-color: var(--accent);
 }
+.nav-icon {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #111820;
+  border: 1px solid #22303d;
+  color: #66c0f4;
+}
+.nav-icon svg { width: 16px; height: 16px; fill: currentColor; display: block; }
+.nav-item.is-active .nav-icon { border-color: rgba(255, 145, 60, .38); background: #1b1710; }
+.nav-text { min-width: 0; }
 .nav-name { display: block; font-size: 13.5px; font-weight: 650; }
 .nav-desc { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
 
