@@ -6,7 +6,7 @@ Un clic sur le bouton vert d'une page d'invitation Discord envoie l'invitation �
 
 ## Ce que ça ajoute
 
-Sur `discord.com/invite/…` et `discord.gg/…`, un bouton **« Envoyer vers mon onglet Discord »** apparaît juste sous le bouton d'envoi « Create Account ».
+Sur `discord.com/invite/…` et `discord.gg/…`, un bouton **« Envoyer vers mon onglet Discord »** — ou **“Send to my Discord tab”** selon la langue du navigateur — apparaît juste sous le bouton d'envoi « Create Account ».
 
 Au clic :
 

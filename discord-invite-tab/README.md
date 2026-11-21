@@ -6,7 +6,7 @@ Click the green button on a Discord invite page and the invite is sent to the Di
 
 ## What it adds
 
-On `discord.com/invite/…` and `discord.gg/…`, a button **“Send to my Discord tab”** appears right under the “Create Account” submit button.
+On `discord.com/invite/…` and `discord.gg/…`, a button **“Send to my Discord tab”** — or **« Envoyer vers mon onglet Discord »** depending on the browser language — appears right under the “Create Account” submit button.
 
 Clicking it:
 
@@ -35,7 +35,7 @@ Header fields:
 - The two GM storage APIs are required: a `@grant none` fork cannot communicate between tabs.
 - The invite page is a React app, so the button is inserted by a `MutationObserver` just below the submit button; it appears a moment after the page.
 - If no Discord tab answers, the button simply switches to “Sent” — nothing breaks.
-- The button label is in French (“Envoyer vers mon onglet Discord”).
+- The button label follows the browser language: French (“Envoyer vers mon onglet Discord”) or English (“Send to my Discord tab”).
 
 ## Privacy
 

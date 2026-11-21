@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discord Web Invite — Open in existing tab
 // @namespace    http://tampermonkey.net/
-// @version      4.0
+// @version      4.1
 // @description  Sends a Discord invite to your already-open Discord tab with one click, instead of loading Discord in the current page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/discord-invite-tab/icon.png
 // @match        *://discord.com/*
@@ -17,6 +17,19 @@
     const STORAGE_KEY = 'vm_discord_pending_invite';
     const path = window.location.pathname;
 
+    // Libellés selon la langue du navigateur (français, sinon anglais)
+    const LANG = String(navigator.language || 'en').toLowerCase().startsWith('fr') ? 'fr' : 'en';
+    const TEXT = {
+        fr: {
+            send: 'Envoyer vers mon onglet Discord',
+            sent: 'Envoyé ! Retourne sur ton onglet Discord'
+        },
+        en: {
+            send: 'Send to my Discord tab',
+            sent: 'Sent! Go back to your Discord tab'
+        }
+    }[LANG];
+
     // =========================================================================
     // 1. SUR LA PAGE D'INVITATION (/invite/...)
     // =========================================================================
@@ -29,7 +42,7 @@
             const btn = document.createElement('button');
             btn.id = 'vm-discord-open-tab-btn';
             btn.type = 'button';
-            btn.innerText = 'Envoyer vers mon onglet Discord';
+            btn.innerText = TEXT.send;
             Object.assign(btn.style, {
                 width: '100%',
                 height: '40px',
@@ -59,7 +72,7 @@
                 });
 
                 btn.dataset.sent = 'true';
-                btn.innerText = 'Envoyé ! Retourne sur ton onglet Discord';
+                btn.innerText = TEXT.sent;
                 btn.style.backgroundColor = '#5865F2';
 
                 const existingTab = window.open('', 'discord_main_tab');
