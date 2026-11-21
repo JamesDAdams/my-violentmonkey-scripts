@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.6
+// @version      4.7
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
@@ -248,9 +248,10 @@
         .srp-picker-btn .srp-code { margin-left: auto; color: #8fa2b1; font-size: 11px; letter-spacing: .5px; }
 
         .srp-picker-panel {
-            position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 6px);
+            position: absolute; z-index: 2147483100; left: 0; right: 0; top: calc(100% + 6px);
             background: #141a21; border: 1px solid #3d4a58; border-radius: 10px;
             box-shadow: 0 20px 50px rgba(0,0,0,.6); overflow: hidden;
+            display: flex; flex-direction: column;
         }
         .srp-picker-panel[hidden] { display: none; }
         .srp-search {
@@ -258,7 +259,7 @@
             color: #e6edf3; padding: 9px 12px; font: inherit; font-size: 13.5px;
         }
         .srp-search:focus { outline: none; }
-        .srp-list { list-style: none; margin: 0; padding: 4px; max-height: 210px; overflow: auto; }
+        .srp-list { list-style: none; margin: 0; padding: 4px; flex: 1 1 auto; min-height: 0; overflow: auto; }
         .srp-opt {
             display: flex; align-items: center; gap: 9px; width: 100%;
             background: none; border: 0; color: #dfe7ee; padding: 7px 9px; border-radius: 7px;
@@ -557,6 +558,26 @@
             list.append(frag);
         };
 
+        const placePanel = () => {
+            const r = button.getBoundingClientRect();
+            const below = innerHeight - r.bottom - 12;
+            const above = r.top - 12;
+            const up = below < 200 && above > below;
+
+            panel.style.position = 'fixed';
+            panel.style.left = Math.max(8, Math.min(r.left, innerWidth - r.width - 8)) + 'px';
+            panel.style.width = r.width + 'px';
+            panel.style.maxHeight = Math.min(290, Math.max(150, (up ? above : below) - 8)) + 'px';
+
+            if (up) {
+                panel.style.top = 'auto';
+                panel.style.bottom = (innerHeight - r.top + 6) + 'px';
+            } else {
+                panel.style.top = (r.bottom + 6) + 'px';
+                panel.style.bottom = 'auto';
+            }
+        };
+
         button.addEventListener('click', () => {
             const willOpen = panel.hidden;
             document.querySelectorAll('.srp-picker-panel').forEach(p => { p.hidden = true; });
@@ -564,9 +585,15 @@
             if (willOpen) {
                 search.value = '';
                 paintList('');
+                placePanel();
                 search.focus();
             }
         });
+
+        addEventListener('resize', () => { if (!panel.hidden) placePanel(); });
+        addEventListener('scroll', e => {
+            if (!panel.hidden && !panel.contains(e.target)) panel.hidden = true;
+        }, true);
         search.addEventListener('input', () => paintList(search.value));
 
         panel.append(search, list);
