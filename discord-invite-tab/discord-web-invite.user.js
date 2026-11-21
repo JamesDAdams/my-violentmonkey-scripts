@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discord Web Invite — Open in existing tab
 // @namespace    http://tampermonkey.net/
-// @version      4.5
+// @version      4.6
 // @description  Sends a Discord invite to your already-open Discord tab with one click, instead of loading Discord in the current page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/discord-invite-tab/icon.png
 // @match        *://discord.com/*
@@ -27,14 +27,16 @@
         fr: {
             send: 'Envoyer vers mon onglet Discord',
             sent: 'Envoyé ! Retourne sur ton onglet Discord',
-            opened: 'Ouvert dans un nouvel onglet — ouvre Discord puis réessaie',
-            waiting: 'Envoi vers ton onglet Discord…'
+            opened: 'Ouvre ton onglet Discord : l’invitation va s’y ouvrir',
+            waiting: 'Envoi vers ton onglet Discord…',
+            manual: 'ouvrir dans un nouvel onglet'
         },
         en: {
             send: 'Send to my Discord tab',
             sent: 'Sent! Go back to your Discord tab',
-            opened: 'Opened in a new tab — open Discord and try again',
-            waiting: 'Sending to your Discord tab…'
+            opened: 'Switch to your Discord tab: the invite will open there',
+            waiting: 'Sending to your Discord tab…',
+            manual: 'open in a new tab'
         }
     }[LANG];
 
@@ -103,12 +105,45 @@
                     if (!btn.dataset.sent) btn.style.backgroundColor = '#23A55A';
                 };
 
+                const showManualLink = () => {
+                    if (document.getElementById('vm-discord-manual-link')) return;
+                    const link = document.createElement('a');
+                    link.id = 'vm-discord-manual-link';
+                    link.href = inviteUrl(inviteCode);
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                    link.textContent = TEXT.manual;
+                    Object.assign(link.style, {
+                        display: 'block',
+                        marginTop: '6px',
+                        textAlign: 'center',
+                        fontSize: '12px',
+                        color: '#00A8FC'
+                    });
+                    btn.insertAdjacentElement('afterend', link);
+                };
+
+                const pollAckLong = () => {
+                    const a = read(ACK, null);
+                    const b = readLocal(LS_ACK);
+                    if ((a && a.id === btn.dataset.inviteId) || (b && b.id === btn.dataset.inviteId)) {
+                        btn.innerText = TEXT.sent;
+                        btn.style.backgroundColor = '#5865F2';
+                        const manual = document.getElementById('vm-discord-manual-link');
+                        if (manual) manual.remove();
+                        return;
+                    }
+                    setTimeout(pollAckLong, 1000);
+                };
+
                 btn.onclick = () => {
                     if (btn.dataset.sent || btn.dataset.busy) return;
                     btn.dataset.busy = '1';
 
                     const id = String(Date.now()) + '-' + Math.random().toString(36).slice(2, 8);
                     const payload = { id, code: inviteCode, ts: Date.now() };
+                    btn.dataset.inviteId = id;
+                    try { console.info('[Discord invite] envoi', id, 'vers l’onglet Discord'); } catch (e) {}
 
                     btn.innerText = TEXT.waiting;
                     btn.style.backgroundColor = '#5865F2';
@@ -142,10 +177,11 @@
                         }
 
                         if (Date.now() - started > WAIT_ACK) {
+                            // pas de réponse : on n'ouvre plus d'onglet tout seul, on garde
+                            // l'invitation en attente et on laisse un lien manuel
                             finish(false);
-                            const url = inviteUrl(inviteCode);
-                            const tab = window.open(url, '_blank');
-                            if (!tab) location.assign(url);
+                            showManualLink();
+                            pollAckLong();
                             return;
                         }
                         setTimeout(check, 300);
@@ -194,15 +230,17 @@
             if (!pending || !pending.code || !pending.id) return;
             if (Date.now() - (pending.ts || 0) > MAX_AGE) return;
 
+            try { console.info('[Discord invite] invitation reçue', pending.id, '→ /invite/' + pending.code); } catch (e) {}
+
             store(KEY, null);
+            writeLocal(LS_KEY, null);
             store(ACK, { id: pending.id, ts: Date.now() });
             writeLocal(LS_ACK, { id: pending.id, ts: Date.now() });
 
             location.assign(inviteUrl(pending.code));
         };
 
-        // une invitation déposée avant l'ouverture de cet onglet est ignorée
-        if (read(KEY, null)) store(KEY, null);
+        const pending = () => read(KEY, null) || readLocal(LS_KEY);
 
         // 1. message instantané entre onglets (fonctionne en arrière-plan)
         try {
@@ -218,8 +256,15 @@
             try { consume(JSON.parse(event.newValue)); } catch (e) { /* ignoré */ }
         });
 
-        // 2. filet de sécurité : relecture du stockage du gestionnaire
-        setInterval(() => consume(read(KEY, null)), 1000);
-        consume(read(KEY, null));
+        // 2. filet de sécurité : relecture des deux stockages
+        setInterval(() => consume(pending()), 1000);
+        consume(pending());
+
+        // 3. au réveil de l'onglet (retour dessus), on consomme tout de suite
+        const wake = () => consume(pending());
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
+        window.addEventListener('focus', wake);
+
+        try { console.info('[Discord invite] onglet Discord prêt (v4.6) — en attente d’invitations'); } catch (e) {}
     }
 })();

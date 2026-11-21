@@ -18,15 +18,15 @@ On `discord.com/invite/…` and `discord.gg/…`, a button **“Send to my Disco
 
 Clicking it:
 
-1. shows **“Sending to your Discord tab…”** and sends the invite code through **three channels at once** — a `BroadcastChannel`, a `localStorage` write on the same origin, and the userscript storage (`GM_setValue`) — so the message gets through even if one of them is unavailable;
-2. the Discord tab you already have open receives it **instantly, even in the background** (a `storage` event and a `BroadcastChannel` message are not throttled like timers), acknowledges it and navigates to `/invite/{code}`;
+1. shows **“Sending to your Discord tab…”** and sends the invite code through **three channels at once** — a `BroadcastChannel`, a `localStorage` write on the same origin, and the userscript storage (`GM_setValue`);
+2. the Discord tab you already have open receives it **instantly, even in the background** (a `storage` event or a channel message is not throttled like a timer); it acknowledges, clears the value and navigates to `/invite/{code}`;
 3. the button turns **“Sent! Go back to your Discord tab”**.
 
-Discord then shows its usual “join server” screen, logged in as you. No network request other than Discord itself, no second session, no login screen.
-
-**If no Discord tab answers within 5 s** (none open, or a tab loaded before the script was installed), the invite opens **in a new tab** and the button says so — the click always does something.
+If no tab answers within 5 s, the button switches to **“Switch to your Discord tab: the invite will open there”** and the invitation stays pending: the Discord tab opens it **as soon as you activate it** (or reload it), and the button then turns to “Sent!”. A small **“open in a new tab”** link is offered as a last resort — no tab is opened behind your back.
 
 > After installing or updating the script, reload the tab where Discord is already open once: a tab loaded before the installation does not run the new version yet.
+
+Open the browser console on both tabs to follow what happens: `[Discord invite]` messages.
 
 ## Limits
 
