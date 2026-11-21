@@ -40,11 +40,16 @@ AGENTS.md                 this file
 Every script gets one `<article class="panel" id="panel-<id>">` in
 `docs/index.html`, in this order:
 
-1. `.panel-head` — `<h2>` with the script name and the site `<span class="tag">`;
-2. `.shots` — **the screenshot first, right under the title**, like every other
-   script (`.shot` for landscape, `.shot.portrait` for tall captures,
-   `.shot.wide` for very wide captures). Never place the screenshot after the
-   feature list;
+1. `.shots` — the screenshot **hero at the very top of the panel**, as a
+   **direct child of `<article>`, before `.panel-body`** (`<article> <div
+   class="shots">…</div> <div class="panel-body">…`). Same visual treatment for
+   every script: dark card with 16 px padding, centred image, rounded corners,
+   bottom border. `.shot` for landscape, `.shot.portrait` for tall captures,
+   `.shot.wide` for very wide captures. It is never inside `.panel-body` and
+   never after the title, the lead or the feature list — that is what makes a
+   panel look different from the others;
+2. `.panel-head` **inside `.panel-body`** — `<h2>` with the script name and the
+   site `<span class="tag">`;
 3. `.lead` — one sentence describing what the script does;
 4. `.feats` — three bullets, factual (what it adds, where the data comes from,
    what stays local);

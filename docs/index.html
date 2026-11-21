@@ -7,7 +7,7 @@
 <meta name="description" content="Userscripts for Steam, Discord and the web, installed in one click with Violentmonkey or Tampermonkey.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#10151b">
-<link rel="stylesheet" href="styles.css?v=14">
+<link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body>
 
@@ -134,14 +134,13 @@
     </article>
 
     <article class="panel" id="panel-steam-region-price" aria-labelledby="region-title" hidden>
+      <div class="shots">
+        <img class="shot wide" src="assets/prix-cle.png" width="814" height="135" alt="Steam purchase box with the key price badge (17,92 €) and the regional Steam price badge ($17.99)">
+      </div>
       <div class="panel-body">
         <div class="panel-head">
           <h2 id="region-title">Steam — <span data-i18n="region.name">Region + key price</span></h2>
           <span class="tag">Steam</span>
-        </div>
-
-        <div class="shots">
-          <img class="shot wide" src="assets/prix-cle.png" width="814" height="135" alt="Steam purchase box with the key price badge (17,92 €) and the regional Steam price badge ($17.99)">
         </div>
 
         <p class="lead" data-i18n="region.desc">Two badges on the purchase box: the Steam price of the country you pick, and the cheapest key price on GG.deals. DLC rows get them too.</p>
@@ -175,7 +174,7 @@
   </main>
 
 </div>
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 <script>
   // Filet de sécurité : si app.js vient d'un cache trop ancien, on recharge une copie fraîche.
   addEventListener('load', function () {
