@@ -11,75 +11,83 @@
 </head>
 <body>
 
-<header class="site-header">
-  <div class="wrap bar">
-    <a class="brand" href="https://github.com/JamesDAdams/my-violentmonkey-scripts">
+<div class="layout">
+
+  <aside class="sidebar">
+    <a class="brand" href="./">
       <span class="mark" aria-hidden="true"></span>
-      <span>
+      <span class="brand-text">
         <strong data-i18n="title">My Violentmonkey scripts</strong>
         <em data-i18n="subtitle">Userscripts for the Steam store, installed in one click.</em>
       </span>
     </a>
+
     <div class="lang" role="group" aria-label="Language / Langue">
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-lang="fr" aria-pressed="false">FR</button>
     </div>
-  </div>
-</header>
 
-<main class="wrap">
+    <nav class="nav" aria-label="Scripts / Scripts">
+      <button type="button" class="nav-item is-active" data-panel="steam-declaration-ia" aria-current="page">
+        <span class="nav-name" data-i18n="steam.name">AI disclosure</span>
+        <span class="nav-desc" data-i18n="steam.navDesc">Steam store</span>
+      </button>
+    </nav>
 
-  <article class="card" id="steam-declaration-ia">
-    <div class="shots">
-      <img class="shot" id="hero" src="assets/preview-en.png" width="806" height="328" alt="Steam game page with the AI row listing the declared uses">
+    <div class="sidebar-foot">
+      <p data-i18n="footer">Source code, changelog and detailed README on GitHub.</p>
+      <a href="https://github.com/JamesDAdams/my-violentmonkey-scripts">github.com/JamesDAdams/my-violentmonkey-scripts</a>
     </div>
+  </aside>
 
-    <div class="card-body">
-      <div class="card-head">
-        <h2>Steam — <span data-i18n="steam.name">AI disclosure</span></h2>
-        <span class="tag">Steam</span>
+  <main class="content">
+
+    <article class="panel" id="panel-steam-declaration-ia" aria-labelledby="steam-title">
+      <div class="shots">
+        <img class="shot" id="hero" src="assets/preview-en.png" width="774" height="328" alt="Steam game page with the AI row listing the declared uses">
       </div>
 
-      <p class="lead" data-i18n="steam.desc">Steam requires developers to disclose generative-AI use. This script brings that disclosure where you actually look: on the game page, and on every thumbnail across the store.</p>
+      <div class="panel-body">
+        <div class="panel-head">
+          <h2 id="steam-title">Steam — <span data-i18n="steam.name">AI disclosure</span></h2>
+          <span class="tag">Steam</span>
+        </div>
 
-      <ul class="feats">
-        <li data-i18n="steam.f1">An “AI” row in the glance box of each game page, with one tag per declared use (graphics, voices, translation, code, in-game AI…).</li>
-        <li data-i18n="steam.f2">An “AI” badge on thumbnails in search, home, tags and sales; declared uses appear in the tooltip.</li>
-        <li data-i18n="steam.f3">Classification and 30-day cache run locally — no account, no third-party service.</li>
-      </ul>
+        <p class="lead" data-i18n="steam.desc">Steam requires developers to disclose generative-AI use. This script brings that disclosure where you actually look: on the game page, and on every thumbnail across the store.</p>
 
-      <div class="actions">
-        <a class="btn" id="install-steam"
-           href="https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-declaration-ia/steam-declaration-ia.user.js"
-           data-i18n="install">Install</a>
-        <a class="btn ghost"
-           href="https://github.com/JamesDAdams/my-violentmonkey-scripts/tree/main/steam-declaration-ia"
-           data-i18n="details">Details</a>
+        <ul class="feats">
+          <li data-i18n="steam.f1">An “AI” row in the glance box of each game page, with one tag per declared use (graphics, voices, translation, code, in-game AI…).</li>
+          <li data-i18n="steam.f2">An “AI” badge on thumbnails in search, home, tags and sales; declared uses appear in the tooltip.</li>
+          <li data-i18n="steam.f3">Classification and 30-day cache run locally — no account, no third-party service.</li>
+        </ul>
+
+        <div class="actions">
+          <a class="btn" id="install-steam"
+             href="https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-declaration-ia/steam-declaration-ia.user.js"
+             data-i18n="install">Install</a>
+          <a class="btn ghost"
+             href="https://github.com/JamesDAdams/my-violentmonkey-scripts/tree/main/steam-declaration-ia"
+             data-i18n="details">Details</a>
+        </div>
+
+        <p class="meta">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-i18n="steam.meta">French / English interface</span>
+          <span class="sep" aria-hidden="true">·</span>
+          <span id="steam-version">v4.0.0</span>
+        </p>
       </div>
+    </article>
 
-      <p class="meta">
-        <span class="dot" aria-hidden="true"></span>
-        <span data-i18n="steam.meta">French / English interface</span>
-        <span class="sep" aria-hidden="true">·</span>
-        <span id="steam-version">v4.0.0</span>
-      </p>
-    </div>
-  </article>
+    <section class="help">
+      <h2 data-i18n="help.title">No userscript manager yet?</h2>
+      <p data-i18n="help.text">The Install button opens the script file. Violentmonkey or Tampermonkey catches it and offers to install — without one, the browser simply displays the code.</p>
+      <a class="btn ghost" href="https://violentmonkey.github.io/get-it/" data-i18n="help.btn">Get Violentmonkey</a>
+    </section>
 
-  <section class="help">
-    <h2 data-i18n="help.title">No userscript manager yet?</h2>
-    <p data-i18n="help.text">The Install button opens the script file. Violentmonkey or Tampermonkey catches it and offers to install — without one, the browser simply displays the code.</p>
-    <a class="btn ghost" href="https://violentmonkey.github.io/get-it/" data-i18n="help.btn">Get Violentmonkey</a>
-  </section>
+  </main>
 
-</main>
-
-<footer class="site-footer">
-  <div class="wrap">
-    <p data-i18n="footer">Source code, changelog and detailed README on GitHub.</p>
-    <p><a href="https://github.com/JamesDAdams/my-violentmonkey-scripts">github.com/JamesDAdams/my-violentmonkey-scripts</a></p>
-  </div>
-</footer>
+</div>
 
 <script src="app.js"></script>
 </body>

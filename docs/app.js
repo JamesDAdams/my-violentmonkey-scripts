@@ -1,4 +1,4 @@
-/* Page statique : bascule FR/EN + version à jour du script. Aucune dépendance. */
+/* Page statique : menu latéral, bascule FR/EN, version lue dans le script. */
 (() => {
   'use strict';
 
@@ -7,6 +7,7 @@
       title: 'My Violentmonkey scripts',
       subtitle: 'Userscripts for the Steam store, installed in one click.',
       'steam.name': 'AI disclosure',
+      'steam.navDesc': 'Steam store',
       'steam.desc': 'Steam requires developers to disclose generative-AI use. This script brings that disclosure where you actually look: on the game page, and on every thumbnail across the store.',
       'steam.f1': 'An “AI” row in the glance box of each game page, with one tag per declared use (graphics, voices, translation, code, in-game AI…).',
       'steam.f2': 'An “AI” badge on thumbnails in search, home, tags and sales; declared uses appear in the tooltip.',
@@ -23,6 +24,7 @@
       title: 'Mes scripts Violentmonkey',
       subtitle: 'Userscripts pour le magasin Steam, installés en un clic.',
       'steam.name': 'Déclaration IA',
+      'steam.navDesc': 'Magasin Steam',
       'steam.desc': 'Steam impose aux développeurs de déclarer l’usage d’IA générative. Ce script ramène cette déclaration là où vous regardez vraiment : sur la fiche du jeu, et sur chaque vignette du magasin.',
       'steam.f1': 'Une ligne « IA » dans l’encart glance de chaque fiche, avec un tag par usage déclaré (graphismes, voix, traduction, code, IA en jeu…).',
       'steam.f2': 'Un bandeau « IA » sur les vignettes des recherches, de l’accueil, des tags et des promotions ; les usages s’affichent en infobulle.',
@@ -43,6 +45,8 @@
   };
 
   const STORAGE_KEY = 'mv-scripts-lang';
+
+  /* ---------- langue ---------- */
 
   const stored = (() => {
     try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
@@ -73,7 +77,37 @@
 
   applyLang(lang);
 
-  /* Version réelle du script, lue dans son en-tête (repli sur la valeur statique). */
+  /* ---------- sélection du script ---------- */
+
+  const select = (id, updateHash) => {
+    const panels = [...document.querySelectorAll('.panel')];
+    if (!panels.length) return;
+    if (!panels.some(p => p.id === 'panel-' + id)) id = panels[0].id.replace(/^panel-/, '');
+    for (const p of panels) p.hidden = p.id !== 'panel-' + id;
+    for (const b of document.querySelectorAll('.nav-item')) {
+      const on = b.dataset.panel === id;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-current', on ? 'page' : 'false');
+    }
+    if (updateHash) {
+      try { history.replaceState(null, '', '#' + id); } catch { /* file:// */ }
+    }
+  };
+
+  // délégation : tout nouvel item ajouté dans .nav fonctionne
+  document.querySelector('.nav')?.addEventListener('click', e => {
+    const b = e.target.closest('.nav-item');
+    if (!b) return;
+    select(b.dataset.panel, true);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  });
+
+  addEventListener('hashchange', () => select((location.hash || '').slice(1), false));
+
+  select((location.hash || '').slice(1) || document.querySelector('.nav-item')?.dataset.panel, false);
+
+  /* ---------- version réelle du script ---------- */
+
   const versionEl = document.getElementById('steam-version');
   const installEl = document.getElementById('install-steam');
   if (versionEl && installEl) {
