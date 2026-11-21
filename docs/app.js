@@ -31,7 +31,7 @@
       'region.f1': 'Choose any country for the Steam price — Argentina, Turkey, the US… — and any region for key prices.',
       'region.f2': 'The key price comes from GG.deals with your own free API key; badges link straight to SteamDB and GG.deals.',
       'region.f3': 'Your key and your regions stay inside the script, on your computer.',
-      'region.configure': 'Configure & install',
+      'region.configure': 'Install',
       'region.meta': 'GG.deals API key required for key prices',
       'cfg.onSteam': 'Steam price',
       'cfg.onKeys': 'GG.deals key price',
@@ -42,6 +42,8 @@
       'cfg.keyHint': 'Required to show the key price.',
       'cfg.keyLink': 'Generate a free key on GG.deals',
       'cfg.keyRequired': 'Enter an API key: it is required to show the key price.',
+      'cfg.showKey': 'Show the key',
+      'cfg.hideKey': 'Hide the key',
       'cfg.keyOpt': 'optional, the key badge will ask for one',
       'cfg.region': 'GG.deals region (key prices)',
       'cfg.steam': 'Steam region (store price)',
@@ -90,7 +92,7 @@
       'region.f1': 'Choisissez n’importe quel pays pour le prix Steam — Argentine, Turquie, États-Unis… — et n’importe quelle région pour les prix des clés.',
       'region.f2': 'Le prix des clés vient de GG.deals avec votre propre clé API gratuite ; les badges renvoient vers SteamDB et GG.deals.',
       'region.f3': 'Votre clé et vos régions restent dans le script, sur votre ordinateur.',
-      'region.configure': 'Configurer & installer',
+      'region.configure': 'Installer',
       'region.meta': 'Clé API GG.deals requise pour les prix des clés',
       'cfg.onSteam': 'Prix Steam',
       'cfg.onKeys': 'Prix des clés GG.deals',
@@ -101,6 +103,8 @@
       'cfg.keyHint': 'Obligatoire pour afficher le prix des clés.',
       'cfg.keyLink': 'Générer une clé gratuite sur GG.deals',
       'cfg.keyRequired': 'Renseignez une clé API : elle est obligatoire pour afficher le prix des clés.',
+      'cfg.showKey': 'Afficher la clé',
+      'cfg.hideKey': 'Masquer la clé',
       'cfg.keyOpt': 'facultatif : le badge clé vous la demandera',
       'cfg.region': 'Région GG.deals (prix des clés)',
       'cfg.steam': 'Région Steam (prix boutique)',
@@ -492,6 +496,23 @@
     const openLink = document.getElementById('cfg-open-install');
     const dlLink = document.getElementById('cfg-download');
     let lastInstallUrl = '';
+
+    const eye = document.getElementById('cfg-key-eye');
+    if (eye) {
+      const syncEye = () => {
+        const shown = keyInput.type === 'text';
+        eye.textContent = shown ? '🙈' : '👁';
+        eye.title = I18N[lang][shown ? 'cfg.hideKey' : 'cfg.showKey'];
+        eye.setAttribute('aria-label', eye.title);
+      };
+      eye.addEventListener('click', () => {
+        keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
+        syncEye();
+        keyInput.focus();
+      });
+      langHooks.push(syncEye);
+      syncEye();
+    }
 
     const copyBtn = document.getElementById('cfg-copy');
     copyBtn && copyBtn.addEventListener('click', async () => {

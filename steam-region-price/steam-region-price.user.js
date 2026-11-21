@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.8
+// @version      4.9
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
@@ -225,7 +225,16 @@
         .srp-field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: #c3d2de; }
         .srp-field.srp-off { opacity: .45; }
         .srp-field.srp-off > span { text-decoration: line-through; text-decoration-thickness: 1px; }
-        .srp-field input[type=text] {
+        .srp-key-row { position: relative; display: flex; }
+        .srp-key-row input { flex: 1; padding-right: 42px; }
+        .srp-eye {
+            position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+            background: none; border: 0; color: #dfe7ee; font-size: 15px; line-height: 1;
+            cursor: pointer; padding: 6px; border-radius: 6px; opacity: .7;
+        }
+        .srp-eye:hover { opacity: 1; background: rgba(255,255,255,.07); }
+        .srp-field input[type=text],
+        .srp-field input[type=password] {
             background: #0f151b; border: 1px solid #3d4a58; border-radius: 9px;
             color: #e6edf3; padding: 9px 12px; font: inherit; font-size: 14px; width: 100%;
         }
@@ -654,12 +663,27 @@
         keyCaption.textContent = UI.keyLabel;
         keyField.append(keyCaption);
         const keyInput = document.createElement('input');
-        keyInput.type = 'text';
+        keyInput.type = 'password';
         keyInput.autocomplete = 'off';
         keyInput.spellcheck = false;
         keyInput.placeholder = 'AbCdEf123456';
         keyInput.value = CONF.key === 'VOTRE_CLE_API_ICI' ? '' : CONF.key;
-        keyField.append(keyInput);
+
+        const keyRow = document.createElement('div');
+        keyRow.className = 'srp-key-row';
+        const eye = document.createElement('button');
+        eye.type = 'button';
+        eye.className = 'srp-eye';
+        eye.textContent = '👁';
+        eye.title = 'Afficher la clé';
+        eye.addEventListener('click', () => {
+            const shown = keyInput.type === 'text';
+            keyInput.type = shown ? 'password' : 'text';
+            eye.textContent = shown ? '👁' : '🙈';
+            keyInput.focus();
+        });
+        keyRow.append(keyInput, eye);
+        keyField.append(keyRow);
 
         const keyHint = document.createElement('p');
         keyHint.className = 'srp-hint';

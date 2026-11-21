@@ -7,7 +7,7 @@
 <meta name="description" content="Userscripts for Steam, Discord and the web, installed in one click with Violentmonkey or Tampermonkey.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#10151b">
-<link rel="stylesheet" href="styles.css?v=13">
+<link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
 
@@ -148,8 +148,12 @@
           <li data-i18n="region.f3">Your key and your regions stay inside the script, on your computer.</li>
         </ul>
 
+        <div class="shots">
+          <img class="shot wide" src="assets/prix-cle.png" width="814" height="135" alt="Steam purchase box with the key price badge (17,92 €) and the regional Steam price badge ($17.99)">
+        </div>
+
         <div class="actions">
-          <button type="button" class="btn" id="install-region" data-i18n="region.configure">Configure &amp; install</button>
+          <button type="button" class="btn" id="install-region" data-i18n="region.configure">Install</button>
           <a class="btn ghost" href="https://github.com/JamesDAdams/my-violentmonkey-scripts/tree/main/steam-region-price" data-i18n="details">Details</a>
         </div>
 
@@ -191,7 +195,10 @@
 
     <div class="field" id="field-key">
       <label for="cfg-key" data-i18n="cfg.key">GG.deals API key</label>
-      <input id="cfg-key" type="text" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
+      <div class="key-row">
+        <input id="cfg-key" type="password" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
+        <button type="button" class="key-eye" id="cfg-key-eye" aria-label="Show the key" title="Show the key">👁</button>
+      </div>
       <p class="hint">
         <span data-i18n="cfg.keyHint">Required to show the key price.</span>
         <a href="https://gg.deals/api/" target="_blank" rel="noopener" data-i18n="cfg.keyLink">Generate a free key on GG.deals</a>
@@ -229,7 +236,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=13"></script>
+<script src="app.js?v=14"></script>
 <script>
   // Filet de sécurité : si app.js vient d'un cache trop ancien, on recharge une copie fraîche.
   addEventListener('load', function () {

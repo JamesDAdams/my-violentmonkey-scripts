@@ -9,6 +9,9 @@ Deux badges sur l'encart d'achat d'une fiche Steam :
 
 Les lignes de DLC reçoivent les deux mêmes badges.
 
+![Encart d'achat Steam avec le badge de prix des clés et le badge de prix régional](screenshots/prix-cle.png)
+
+
 ## Configuration
 
 Le script a besoin de trois valeurs, à définir en tête de fichier :

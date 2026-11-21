@@ -9,6 +9,9 @@ Two badges on the purchase box of a Steam game page:
 
 DLC rows get the same two badges.
 
+![Steam purchase box with the key price badge and the regional Steam price badge](screenshots/prix-cle.png)
+
+
 ## Configure it
 
 The script needs three values, set at the top of the file:

@@ -444,6 +444,20 @@ html.dialog-fallback::before { content: ""; position: fixed; inset: 0; backgroun
 .toggle-warn { margin: -4px 0 0; font-size: 12px; color: #e6b45e; }
 .toggle-warn[hidden] { display: none; }
 
+
+/* capture large dans un panneau */
+.shot.wide { max-width: 100%; width: 100%; height: auto; border-radius: 10px; }
+
+/* champ clé masqué + œil */
+.key-row { position: relative; display: flex; }
+.key-row #cfg-key { flex: 1; padding-right: 44px; }
+.key-eye {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: transparent; border: 0; font-size: 15px; line-height: 1;
+  cursor: pointer; padding: 6px; border-radius: 6px; opacity: .75;
+}
+.key-eye:hover { opacity: 1; background: rgba(255,255,255,.06); }
+
 .field.is-off { opacity: .45; }
 .field.is-off label { text-decoration: line-through; text-decoration-thickness: 1px; }
 #cfg-generate:disabled { opacity: .45; cursor: not-allowed; }
