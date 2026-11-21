@@ -332,12 +332,14 @@
     let generated = '';
     let region = 'fr';
     let steam = 'ar';
+    let openedAt = 0;
 
     makePicker(document.getElementById('picker-region'), region, v => { region = v; });
     makePicker(document.getElementById('picker-steam'), steam, v => { steam = v; });
 
     const openDialog = () => {
       if (dlg.open) return;
+      openedAt = Date.now();
       result.hidden = true;
       actions.hidden = false;
       try {
@@ -359,7 +361,8 @@
     installBtn && installBtn.addEventListener('click', openDialog);
 
     dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeDialog));
-    dlg.addEventListener('click', e => { if (e.target === dlg) closeDialog(); });
+    // fermeture par clic sur le fond, mais pas juste après l'ouverture (double-clic sur le bouton)
+    dlg.addEventListener('click', e => { if (e.target === dlg && Date.now() - openedAt > 300) closeDialog(); });
     dlg.addEventListener('close', () => document.documentElement.classList.remove('dialog-fallback'));
 
     form.addEventListener('submit', async e => {
