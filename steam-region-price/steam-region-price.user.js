@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.2
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
@@ -29,6 +29,40 @@
     // 4) Parties affichées — on ne peut pas désactiver les deux
     const SHOW_STEAM_REGION = true;   // prix boutique Steam (pays choisi)
     const SHOW_GGDEALS = true;        // prix clé le moins cher (GG.deals)
+    // =========================================================================
+
+
+    // =========================================================================
+    // Surcharge par l'installeur du site : l'URL d'installation peut porter
+    // ?k=<clé>&gr=<région GG.deals>&sr=<région Steam>&s=1&g=1
+    // (rien n'est stocké ailleurs que dans le gestionnaire de userscripts)
+    // =========================================================================
+    function installParams() {
+        try {
+            if (typeof GM_info === 'undefined' || !GM_info.script) return {};
+            const raw = GM_info.script.downloadURL || GM_info.script.updateURL || '';
+            if (!raw) return {};
+            const q = new URL(raw).searchParams;
+            const out = {};
+            if (q.get('k')) out.key = q.get('k');
+            if (q.get('gr')) out.gg = q.get('gr').toLowerCase();
+            if (q.get('sr')) out.steam = q.get('sr').toLowerCase();
+            if (q.has('s')) out.showSteam = q.get('s') !== '0';
+            if (q.has('g')) out.showKeys = q.get('g') !== '0';
+            return out;
+        } catch (e) {
+            return {};
+        }
+    }
+
+    const PARAMS = installParams();
+    const CONF = {
+        key: PARAMS.key || GG_DEALS_API_KEY,
+        ggRegion: PARAMS.gg || GG_DEALS_REGION,
+        steamRegion: PARAMS.steam || STEAM_REGION,
+        showSteam: PARAMS.showSteam !== undefined ? PARAMS.showSteam : SHOW_STEAM_REGION,
+        showKeys: PARAMS.showKeys !== undefined ? PARAMS.showKeys : SHOW_GGDEALS
+    };
     // =========================================================================
 
     const LOCALE = String(navigator.language || 'fr').toLowerCase().startsWith('fr') ? 'fr' : 'en';
@@ -117,8 +151,8 @@
     // 1. PRIX STEAM DE LA RÉGION CHOISIE (API STEAM, même origine)
     function fetchRegionPrice(id, isPackage, targetContainer) {
         const endpoint = isPackage
-            ? `https://store.steampowered.com/api/packagedetails?packageids=${id}&cc=${STEAM_REGION}`
-            : `https://store.steampowered.com/api/appdetails?appids=${id}&cc=${STEAM_REGION}&filters=price_overview`;
+            ? `https://store.steampowered.com/api/packagedetails?packageids=${id}&cc=${CONF.steamRegion}`
+            : `https://store.steampowered.com/api/appdetails?appids=${id}&cc=${CONF.steamRegion}&filters=price_overview`;
 
         const steamDbUrl = isPackage
             ? `https://steamdb.info/sub/${id}/`
@@ -142,8 +176,8 @@
                             badge.href = steamDbUrl;
                             badge.target = '_blank';
                             badge.rel = 'noopener noreferrer';
-                            badge.title = T.steamTitle(nameOf(STEAM_REGION));
-                            badge.textContent = `${flagOf(STEAM_REGION)} ${money(priceData.final / 100, priceData.currency)}${discount}`;
+                            badge.title = T.steamTitle(nameOf(CONF.steamRegion));
+                            badge.textContent = `${flagOf(CONF.steamRegion)} ${money(priceData.final / 100, priceData.currency)}${discount}`;
 
                             targetContainer.insertBefore(badge, targetContainer.firstChild);
                         }
@@ -159,7 +193,7 @@
     function fetchKeyshopPrice(appId, targetContainer) {
         if (!appId) return;
 
-        if (!GG_DEALS_API_KEY || GG_DEALS_API_KEY === 'VOTRE_CLE_API_ICI') {
+        if (!CONF.key || CONF.key === 'VOTRE_CLE_API_ICI') {
             const warnBadge = document.createElement('a');
             warnBadge.className = 'steam-custom-badge badge-key-warn';
             warnBadge.href = 'https://gg.deals/api/';
@@ -170,7 +204,7 @@
             return;
         }
 
-        const apiUrl = `https://api.gg.deals/v1/prices/by-steam-app-id/?ids=${appId}&key=${encodeURIComponent(GG_DEALS_API_KEY)}&region=${GG_DEALS_REGION}`;
+        const apiUrl = `https://api.gg.deals/v1/prices/by-steam-app-id/?ids=${appId}&key=${encodeURIComponent(CONF.key)}&region=${CONF.ggRegion}`;
 
         GM_xmlhttpRequest({
             method: 'GET',
@@ -239,9 +273,9 @@
     }
 
     // 3. INJECTION DANS LA PAGE
-    const showRegion = SHOW_STEAM_REGION || !SHOW_GGDEALS;
-    const showKeys = SHOW_GGDEALS;
-    if (!SHOW_STEAM_REGION && !SHOW_GGDEALS) {
+    const showRegion = CONF.showSteam || !CONF.showKeys;
+    const showKeys = CONF.showKeys;
+    if (!CONF.showSteam && !CONF.showKeys) {
         console.warn('[Steam region] Les deux parties sont désactivées : seul le prix Steam est affiché.');
     }
 

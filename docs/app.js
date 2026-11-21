@@ -49,7 +49,10 @@
       'cfg.copy': 'Copy the code',
       'cfg.close': 'Close',
       'cfg.search': 'Search a country…',
-      'cfg.downloaded': 'steam-region-price.user.js downloaded. Drag it into the Violentmonkey dashboard, or open it with “New script” and paste the code.',
+      'cfg.installing': 'Opening the install page… Violentmonkey or Tampermonkey should offer to install the script with your values.',
+      'cfg.installFallback': 'Nothing happened? Open the install page manually, or download a copy:',
+      'cfg.openInstall': 'Open the install page',
+      'cfg.download': 'Download a copy',
       'cfg.copied': 'Code copied to the clipboard.',
       'cfg.copyFailed': 'Copy failed — select the code manually.',
       'cfg.error': 'Could not download the template. Check your connection and try again.',
@@ -103,7 +106,10 @@
       'cfg.copy': 'Copier le code',
       'cfg.close': 'Fermer',
       'cfg.search': 'Rechercher un pays…',
-      'cfg.downloaded': 'steam-region-price.user.js téléchargé. Glissez-le dans le tableau de bord Violentmonkey, ou ouvrez « Nouveau script » et collez le code.',
+      'cfg.installing': 'Ouverture de la page d’installation… Violentmonkey ou Tampermonkey devrait proposer le script avec vos valeurs.',
+      'cfg.installFallback': 'Rien ne s’est passé ? Ouvrez la page d’installation à la main, ou téléchargez une copie :',
+      'cfg.openInstall': 'Ouvrir la page d’installation',
+      'cfg.download': 'Télécharger une copie',
       'cfg.copied': 'Code copié dans le presse-papiers.',
       'cfg.copyFailed': 'Copie impossible — sélectionnez le code à la main.',
       'cfg.error': 'Téléchargement du modèle impossible. Vérifiez la connexion et réessayez.',
@@ -358,6 +364,7 @@
     const keyInput = document.getElementById('cfg-key');
     const result = document.getElementById('cfg-result');
     const resultText = document.getElementById('cfg-result-text');
+    const resultHint = document.getElementById('cfg-result-hint');
     const actions = document.getElementById('cfg-actions');
     let generated = '';
     let region = 'fr';
@@ -443,22 +450,35 @@
           .replace(/(const SHOW_STEAM_REGION = )(?:true|false);/, (_m, p1) => p1 + onSteam.checked + ';')
           .replace(/(const SHOW_GGDEALS = )(?:true|false);/, (_m, p1) => p1 + onKeys.checked + ';');
 
-        const blob = new Blob([generated], { type: 'text/javascript' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'steam-region-price.user.js';
-        document.body.append(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        // URL d'installation : le gestionnaire de userscripts intercepte les *.user.js
+        // et le script lit ses valeurs dans cette URL (GM_info.script.downloadURL).
+        const installUrl = new URL(REGION_TEMPLATE);
+        if (key) installUrl.searchParams.set('k', key);
+        installUrl.searchParams.set('gr', region);
+        installUrl.searchParams.set('sr', steam);
+        installUrl.searchParams.set('s', onSteam.checked ? '1' : '0');
+        installUrl.searchParams.set('g', onKeys.checked ? '1' : '0');
 
-        resultText.textContent = I18N[lang]['cfg.downloaded'];
+        lastInstallUrl = installUrl.toString();
+        resultText.textContent = I18N[lang]['cfg.installing'];
+        resultHint.textContent = I18N[lang]['cfg.installFallback'];
+        openLink.href = lastInstallUrl;
+        openLink.textContent = I18N[lang]['cfg.openInstall'];
+        dlLink.textContent = I18N[lang]['cfg.download'];
+        dlLink.href = URL.createObjectURL(new Blob([generated], { type: 'text/javascript' }));
+        dlLink.download = 'steam-region-price.user.js';
+        result.hidden = false;
         actions.hidden = true;
+
+        setTimeout(() => { window.location.assign(lastInstallUrl); }, 450);
       } catch (err) {
         resultText.textContent = I18N[lang]['cfg.error'];
       }
     });
+
+    const openLink = document.getElementById('cfg-open-install');
+    const dlLink = document.getElementById('cfg-download');
+    let lastInstallUrl = '';
 
     const copyBtn = document.getElementById('cfg-copy');
     copyBtn && copyBtn.addEventListener('click', async () => {

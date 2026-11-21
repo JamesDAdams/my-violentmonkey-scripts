@@ -7,7 +7,7 @@
 <meta name="description" content="Userscripts for Steam, Discord and the web, installed in one click with Violentmonkey or Tampermonkey.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#10151b">
-<link rel="stylesheet" href="styles.css?v=9">
+<link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
 
@@ -218,7 +218,10 @@
 
     <div class="config-result" id="cfg-result" hidden>
       <p id="cfg-result-text"></p>
+      <p class="hint" id="cfg-result-hint"></p>
       <div class="config-actions">
+        <a class="btn ghost" id="cfg-open-install" href="#" target="_blank" rel="noopener"></a>
+        <a class="btn ghost" id="cfg-download" href="#"></a>
         <button type="button" class="btn ghost" id="cfg-copy" data-i18n="cfg.copy">Copy the code</button>
         <button type="button" class="btn" data-close data-i18n="cfg.close">Close</button>
       </div>
@@ -226,7 +229,7 @@
   </form>
 </dialog>
 
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 <script>
   // Filet de sécurité : si app.js vient d'un cache trop ancien, on recharge une copie fraîche.
   addEventListener('load', function () {

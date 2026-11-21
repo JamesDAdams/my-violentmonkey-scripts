@@ -23,7 +23,7 @@ Le script a besoin de trois valeurs, à définir en tête de fichier :
 
 Les deux parties se désactivent indépendamment, **mais pas les deux en même temps** : sans aucune des deux le script n'afficherait rien, donc l'installeur le bloque (et le script retombe sur le prix Steam).
 
-**Recommandé : passez par l'installeur du site** — <https://script.jamesserver.fr/#steam-region-price> — une fenêtre demande les trois valeurs (listes de pays avec drapeaux et recherche), puis génère le fichier avec vos valeurs. Rien n'est envoyé : le fichier est fabriqué dans votre navigateur et téléchargé.
+**Recommandé : passez par l'installeur du site** — <https://script.jamesserver.fr/#steam-region-price> — une fenêtre demande les valeurs (listes de pays avec drapeaux et recherche), puis **installe le script directement**, comme les autres boutons d'installation : le gestionnaire intercepte une URL `*.user.js` qui porte vos valeurs en paramètres, et le script les relit à l'exécution via `GM_info.script.downloadURL`. Rien n'est envoyé à un serveur ; les valeurs ne vivent que dans l'URL d'installation du script, sur votre machine. Un lien « Télécharger une copie » reste disponible.
 
 **Ou à la main :** ouvrez le script dans Violentmonkey et modifiez les trois constantes :
 

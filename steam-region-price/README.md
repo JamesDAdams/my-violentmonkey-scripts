@@ -23,7 +23,7 @@ The script needs three values, set at the top of the file:
 
 Both sections can be turned off independently, **but not at the same time**: with both disabled the script would show nothing, so the installer blocks it (and the script falls back to the Steam price).
 
-**Recommended: use the installer on the site** — <https://script.jamesserver.fr/#steam-region-price> — a dialog asks for the three values (country lists with flags and search), then generates the file with your values in it. Nothing is sent anywhere: the file is built in your browser and downloaded.
+**Recommended: use the installer on the site** — <https://script.jamesserver.fr/#steam-region-price> — a dialog asks for the values (country lists with flags and search), then **installs the script directly**, exactly like the other install buttons: the manager intercepts a `*.user.js` URL that carries your values in its query string, and the script reads them at runtime from `GM_info.script.downloadURL`. Nothing is sent to a server; the values only live in the script's install URL, on your machine. A “Download a copy” link is also available.
 
 **Or manually:** open the script in Violentmonkey and edit the three constants at the top:
 
