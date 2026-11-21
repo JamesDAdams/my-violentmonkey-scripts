@@ -4,7 +4,7 @@
 
 Personal collection of userscripts for [Violentmonkey](https://violentmonkey.github.io/) (also compatible with Tampermonkey). One folder per script, each with a detailed README and screenshots.
 
-Website: **https://jamesdadams.github.io/my-violentmonkey-scripts/**
+Website: **https://script.jamesserver.fr/**
 
 ## Scripts
 

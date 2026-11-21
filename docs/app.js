@@ -5,7 +5,7 @@
   const I18N = {
     en: {
       title: 'My Violentmonkey scripts',
-      subtitle: 'Userscripts for the Steam store, installed in one click.',
+      subtitle: 'Small userscripts for Steam and the web, installed in one click.',
       'steam.name': 'AI disclosure',
       'steam.navDesc': 'Steam store',
       'steam.desc': 'Steam requires developers to disclose generative-AI use. This script brings that disclosure where you actually look: on the game page, and on every thumbnail across the store.',
@@ -29,7 +29,7 @@
     },
     fr: {
       title: 'Mes scripts Violentmonkey',
-      subtitle: 'Userscripts pour le magasin Steam, installés en un clic.',
+      subtitle: 'Petits userscripts pour Steam et le web, installés en un clic.',
       'steam.name': 'Déclaration IA',
       'steam.navDesc': 'Magasin Steam',
       'steam.desc': 'Steam impose aux développeurs de déclarer l’usage d’IA générative. Ce script ramène cette déclaration là où vous regardez vraiment : sur la fiche du jeu, et sur chaque vignette du magasin.',
