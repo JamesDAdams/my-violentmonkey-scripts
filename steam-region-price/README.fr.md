@@ -25,6 +25,12 @@ Les deux parties se désactivent indépendamment, **mais pas les deux en même t
 
 **Recommandé : passez par l'installeur du site** — <https://script.jamesserver.fr/#steam-region-price> — une fenêtre demande les valeurs (listes de pays avec drapeaux et recherche), puis **installe le script directement**, comme les autres boutons d'installation : le gestionnaire intercepte une URL `*.user.js` qui porte vos valeurs en paramètres, et le script les relit à l'exécution via `GM_info.script.downloadURL`. Rien n'est envoyé à un serveur ; les valeurs ne vivent que dans l'URL d'installation du script, sur votre machine. Un lien « Télécharger une copie » reste disponible.
 
+### Si les valeurs de l'installeur n'ont pas suivi
+
+Certains gestionnaires ne conservent pas l'URL d'installation. Sur une fiche de jeu, cliquez sur le badge **⚙** à côté des badges de prix : un panneau s'ouvre (clé, les deux régions, les deux interrupteurs) et enregistre les valeurs avec `GM_setValue`, sur votre machine. La console affiche la configuration utilisée au démarrage : `[Steam region] configuration (paramètres d'installation | réglages enregistrés | valeurs du fichier)`.
+
+Le lien **« Télécharger une copie »** de l'installeur fait l'inverse : il écrit vos valeurs directement dans les constantes du fichier.
+
 **Ou à la main :** ouvrez le script dans Violentmonkey et modifiez les trois constantes :
 
 ```js

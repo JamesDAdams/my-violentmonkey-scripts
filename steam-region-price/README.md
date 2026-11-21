@@ -25,6 +25,12 @@ Both sections can be turned off independently, **but not at the same time**: wit
 
 **Recommended: use the installer on the site** — <https://script.jamesserver.fr/#steam-region-price> — a dialog asks for the values (country lists with flags and search), then **installs the script directly**, exactly like the other install buttons: the manager intercepts a `*.user.js` URL that carries your values in its query string, and the script reads them at runtime from `GM_info.script.downloadURL`. Nothing is sent to a server; the values only live in the script's install URL, on your machine. A “Download a copy” link is also available.
 
+### If the installer values did not apply
+
+Some managers do not keep the install URL. On a game page, click the **⚙** badge next to the price badges: a panel opens with the key, the two regions and the two toggles, and stores them with `GM_setValue` (on your machine). The console prints the configuration in use at startup: `[Steam region] configuration (install parameters | stored settings | file values)`.
+
+The **“Download a copy”** link of the installer does the opposite: it writes your values directly in the file's constants.
+
 **Or manually:** open the script in Violentmonkey and edit the three constants at the top:
 
 ```js

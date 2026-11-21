@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.2
+// @version      4.3
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_addStyle
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @connect      store.steampowered.com
 // @connect      api.gg.deals
 // ==/UserScript==
@@ -55,14 +57,45 @@
         }
     }
 
+    const STORED_KEY = 'steamRegionPrice/config';
+
+    function storedConfig() {
+        try {
+            if (typeof GM_getValue !== 'function') return null;
+            const v = GM_getValue(STORED_KEY, null);
+            return (v && typeof v === 'object') ? v : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     const PARAMS = installParams();
+    const STORED = storedConfig();
+
+    function pick(name, fromParams, fromFile) {
+        if (STORED && STORED[name] !== undefined && STORED[name] !== '') return STORED[name];
+        if (fromParams !== undefined) return fromParams;
+        return fromFile;
+    }
+
     const CONF = {
-        key: PARAMS.key || GG_DEALS_API_KEY,
-        ggRegion: PARAMS.gg || GG_DEALS_REGION,
-        steamRegion: PARAMS.steam || STEAM_REGION,
-        showSteam: PARAMS.showSteam !== undefined ? PARAMS.showSteam : SHOW_STEAM_REGION,
-        showKeys: PARAMS.showKeys !== undefined ? PARAMS.showKeys : SHOW_GGDEALS
+        key: pick('key', PARAMS.key, GG_DEALS_API_KEY),
+        ggRegion: pick('ggRegion', PARAMS.gg, GG_DEALS_REGION),
+        steamRegion: pick('steamRegion', PARAMS.steam, STEAM_REGION),
+        showSteam: pick('showSteam', PARAMS.showSteam, SHOW_STEAM_REGION),
+        showKeys: pick('showKeys', PARAMS.showKeys, SHOW_GGDEALS)
     };
+
+    try {
+        const source = STORED ? 'réglages enregistrés' : (PARAMS.key || PARAMS.gg || PARAMS.steam || PARAMS.s !== undefined ? 'paramètres d’installation' : 'valeurs du fichier');
+        console.info('[Steam region] configuration (' + source + ') :', {
+            cle: CONF.key ? 'définie' : 'absente',
+            regionGG: CONF.ggRegion,
+            regionSteam: CONF.steamRegion,
+            prixSteam: CONF.showSteam,
+            prixCles: CONF.showKeys
+        });
+    } catch (e) { /* console indisponible */ }
     // =========================================================================
 
     const LOCALE = String(navigator.language || 'fr').toLowerCase().startsWith('fr') ? 'fr' : 'en';
@@ -143,6 +176,42 @@
             border: 1px solid #e5a93b;
             color: #e5a93b !important;
         }
+        a.badge-conf {
+            background: #1b2838;
+            border: 1px solid #7f8f9f;
+            color: #d6e4ef !important;
+            padding: 0 8px;
+        }
+        .srp-overlay {
+            position: fixed; inset: 0; z-index: 2147483000;
+            background: rgba(5, 8, 11, .72);
+            display: grid; place-items: center;
+            font: 13px/1.5 Arial, Helvetica, sans-serif;
+        }
+        .srp-box {
+            background: #1b2838; color: #dfe7ee;
+            border: 1px solid #3d4a58; border-radius: 12px;
+            padding: 18px 20px; width: min(430px, calc(100vw - 32px));
+            box-shadow: 0 20px 60px rgba(0,0,0,.6);
+        }
+        .srp-box h3 { margin: 0 0 4px; font-size: 15px; }
+        .srp-box p { margin: 0 0 12px; font-size: 11.5px; color: #9fb0bf; }
+        .srp-box label { display: block; margin-bottom: 10px; font-size: 12px; color: #c3d2de; }
+        .srp-box input[type=text] {
+            display: block; width: 100%; margin-top: 4px;
+            background: #0f151b; border: 1px solid #3d4a58; border-radius: 7px;
+            color: #e6edf3; padding: 7px 9px; font: inherit; font-size: 13px;
+        }
+        .srp-row { display: flex; gap: 10px; }
+        .srp-row label { flex: 1; }
+        .srp-check { display: flex; align-items: center; gap: 7px; margin: 0; }
+        .srp-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+        .srp-btn {
+            border: 1px solid transparent; border-radius: 7px; padding: 7px 12px;
+            background: #ff913c; color: #171108; font: inherit; font-weight: 700; cursor: pointer;
+        }
+        .srp-btn.ghost { background: transparent; border-color: #3d4a58; color: #dfe7ee; font-weight: 500; }
+        .srp-error { color: #e5a93b; font-size: 11.5px; margin: 6px 0 0; }
     `);
 
     const appIdMatch = window.location.pathname.match(/\/app\/(\d+)/);
@@ -272,7 +341,93 @@
         });
     }
 
-    // 3. INJECTION DANS LA PAGE
+    // 3. RÉGLAGES EN PAGE (secours si les paramètres d'installation n'ont pas suivi)
+    function openSettings() {
+        if (document.querySelector('.srp-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'srp-overlay';
+        overlay.innerHTML = `
+            <form class="srp-box">
+                <h3>Réglages — prix Steam & prix des clés</h3>
+                <p>Valeurs enregistrées par le gestionnaire de userscripts, sur votre machine.</p>
+                <label>Clé API GG.deals (gg.deals/api)
+                    <input type="text" name="key" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
+                </label>
+                <div class="srp-row">
+                    <label>Région GG.deals
+                        <input type="text" name="ggRegion" maxlength="2" placeholder="fr">
+                    </label>
+                    <label>Région Steam
+                        <input type="text" name="steamRegion" maxlength="2" placeholder="ar">
+                    </label>
+                </div>
+                <div class="srp-row">
+                    <label class="srp-check"><input type="checkbox" name="showSteam"> Prix Steam</label>
+                    <label class="srp-check"><input type="checkbox" name="showKeys"> Prix des clés</label>
+                </div>
+                <div class="srp-actions">
+                    <button type="button" class="srp-btn ghost" data-act="cancel">Annuler</button>
+                    <button type="submit" class="srp-btn">Enregistrer</button>
+                </div>
+            </form>
+        `;
+
+        const form = overlay.querySelector('form');
+        form.key.value = CONF.key === 'VOTRE_CLE_API_ICI' ? '' : CONF.key;
+        form.ggRegion.value = CONF.ggRegion;
+        form.steamRegion.value = CONF.steamRegion;
+        form.showSteam.checked = !!CONF.showSteam;
+        form.showKeys.checked = !!CONF.showKeys;
+
+        overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+        form.querySelector('[data-act="cancel"]').addEventListener('click', () => overlay.remove());
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const showSteam = form.showSteam.checked;
+            const showKeys = form.showKeys.checked;
+            const err = form.querySelector('.srp-error') || document.createElement('p');
+
+            if (!showSteam && !showKeys) {
+                err.className = 'srp-error';
+                err.textContent = 'Gardez au moins une des deux parties active.';
+                form.append(err);
+                return;
+            }
+
+            const norm = v => String(v || '').trim().toLowerCase().slice(0, 2).replace(/[^a-z]/g, '');
+            const ggRegion = norm(form.ggRegion.value) || 'fr';
+            const steamRegion = norm(form.steamRegion.value) || 'ar';
+
+            if (typeof GM_setValue === 'function') {
+                GM_setValue(STORED_KEY, {
+                    key: form.key.value.trim(),
+                    ggRegion,
+                    steamRegion,
+                    showSteam,
+                    showKeys
+                });
+            }
+            location.reload();
+        });
+
+        document.body.append(overlay);
+        form.key.focus();
+    }
+
+    function addSettingsBadge(container) {
+        if (!container || container.querySelector('.badge-conf')) return;
+        const badge = document.createElement('a');
+        badge.className = 'steam-custom-badge badge-conf';
+        badge.href = '#';
+        badge.title = 'Configurer : clé GG.deals, régions, parties affichées';
+        badge.textContent = '⚙';
+        badge.addEventListener('click', e => { e.preventDefault(); openSettings(); });
+        container.insertBefore(badge, container.firstChild);
+    }
+
+    // 4. INJECTION DANS LA PAGE
     const showRegion = CONF.showSteam || !CONF.showKeys;
     const showKeys = CONF.showKeys;
     if (!CONF.showSteam && !CONF.showKeys) {
@@ -288,6 +443,7 @@
         const actionBg = wrapper.querySelector('.game_purchase_action_bg');
 
         if (subInput && actionBg) {
+            addSettingsBadge(actionBg);
             if (showRegion) fetchRegionPrice(subInput.value, true, actionBg);
 
             if (showKeys && !mainGameProcessed && mainAppId) {
