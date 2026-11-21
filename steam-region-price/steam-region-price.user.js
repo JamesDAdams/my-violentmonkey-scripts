@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.4
+// @version      4.5
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
@@ -268,10 +268,13 @@
         if (!CONF.key || CONF.key === 'VOTRE_CLE_API_ICI') {
             const warnBadge = document.createElement('a');
             warnBadge.className = 'steam-custom-badge badge-key-warn';
-            warnBadge.href = 'https://gg.deals/api/';
-            warnBadge.target = '_blank';
-            warnBadge.title = T.keyRequiredTitle;
+            warnBadge.href = '#';
+            warnBadge.title = 'Cliquer pour saisir votre clé API GG.deals (gratuite)';
             warnBadge.textContent = '🔑 ' + T.keyRequired;
+            warnBadge.addEventListener('click', e => {
+                e.preventDefault();
+                openSettings();
+            });
             targetContainer.insertBefore(warnBadge, targetContainer.firstChild);
             return;
         }
