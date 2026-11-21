@@ -18,13 +18,13 @@ On `discord.com/invite/…` and `discord.gg/…`, a button **“Send to my Disco
 
 Clicking it:
 
-1. stores the invite code in the userscript storage (`GM_setValue`) and shows **“Sending to your Discord tab…”**;
-2. the Discord tab you already have open reads it (a lookup every second with `GM_getValue`), acknowledges it, clears the value and navigates to `/invite/{code}`;
-3. the button then turns **“Sent! Go back to your Discord tab”**.
+1. shows **“Sending to your Discord tab…”** and sends the invite code through **three channels at once** — a `BroadcastChannel`, a `localStorage` write on the same origin, and the userscript storage (`GM_setValue`) — so the message gets through even if one of them is unavailable;
+2. the Discord tab you already have open receives it **instantly, even in the background** (a `storage` event and a `BroadcastChannel` message are not throttled like timers), acknowledges it and navigates to `/invite/{code}`;
+3. the button turns **“Sent! Go back to your Discord tab”**.
 
-Discord shows its usual “join server” screen, logged in as you. No network request other than Discord itself, no second session, no login screen.
+Discord then shows its usual “join server” screen, logged in as you. No network request other than Discord itself, no second session, no login screen.
 
-**If no Discord tab answers within 2.5 s** (none open, or a tab loaded before the script was installed), the invite is opened **in a new tab** instead and the button says so — the click always does something.
+**If no Discord tab answers within 5 s** (none open, or a tab loaded before the script was installed), the invite opens **in a new tab** and the button says so — the click always does something.
 
 > After installing or updating the script, reload the tab where Discord is already open once: a tab loaded before the installation does not run the new version yet.
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discord Web Invite — Open in existing tab
 // @namespace    http://tampermonkey.net/
-// @version      4.4
+// @version      4.5
 // @description  Sends a Discord invite to your already-open Discord tab with one click, instead of loading Discord in the current page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/discord-invite-tab/icon.png
 // @match        *://discord.com/*
@@ -13,12 +13,15 @@
 (function () {
     'use strict';
 
-    const KEY = 'vm_discord_pending_invite';
+    const KEY = 'vm_discord_pending_invite';        // stockage du gestionnaire (cross-origin)
     const ACK = 'vm_discord_pending_ack';
-    const MAX_AGE = 3 * 60 * 1000;      // une invitation non consommée expire au bout de 3 minutes
-    const WAIT_ACK = 2500;              // temps laissé à l'onglet Discord pour répondre
+    const LS_KEY = 'vm-discord-pending';            // même origine discord.com
+    const LS_ACK = 'vm-discord-ack';
+    const CHANNEL = 'vm-discord-invite';            // BroadcastChannel, même origine
 
-    // Libellés selon la langue du navigateur (français, sinon anglais)
+    const MAX_AGE = 3 * 60 * 1000;   // une invitation non consommée expire au bout de 3 minutes
+    const WAIT_ACK = 5000;           // temps laissé à l'onglet Discord pour répondre
+
     const LANG = String(navigator.language || 'en').toLowerCase().startsWith('fr') ? 'fr' : 'en';
     const TEXT = {
         fr: {
@@ -43,10 +46,30 @@
     };
     const inviteUrl = code => 'https://discord.com/invite/' + encodeURIComponent(code);
 
+    // Même origine (discord.com) : les autres onglets sont prévenus instantanément, même
+    // en arrière-plan. discord.gg est une autre origine : on ne garde que le stockage GM.
+    const sameOrigin = location.hostname === 'discord.com';
+
+    const writeLocal = (key, value) => {
+        if (!sameOrigin) return;
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignoré */ }
+    };
+    const readLocal = key => {
+        if (!sameOrigin) return null;
+        try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; }
+    };
+    const broadcast = value => {
+        try {
+            const bc = new BroadcastChannel(CHANNEL);
+            bc.postMessage(value);
+            bc.close();
+        } catch (e) { /* pas de BroadcastChannel */ }
+    };
+
     const onInvitePage = location.pathname.startsWith('/invite/') || location.hostname === 'discord.gg';
 
     // =========================================================================
-    // 1. PAGE D'INVITATION (/invite/… ou discord.gg/…)
+    // 1. PAGE D'INVITATION
     // =========================================================================
     if (onInvitePage) {
         const parts = location.pathname.split('/').filter(Boolean);
@@ -81,23 +104,27 @@
                 };
 
                 btn.onclick = () => {
-                    if (btn.dataset.sent) return;
+                    if (btn.dataset.sent || btn.dataset.busy) return;
+                    btn.dataset.busy = '1';
 
                     const id = String(Date.now()) + '-' + Math.random().toString(36).slice(2, 8);
-                    store(KEY, { id, code: inviteCode, ts: Date.now() });
+                    const payload = { id, code: inviteCode, ts: Date.now() };
 
                     btn.innerText = TEXT.waiting;
                     btn.style.backgroundColor = '#5865F2';
 
-                    // L'onglet Discord déjà ouvert répond en déposant un accusé de réception.
-                    // Sans réponse, on ouvre l'invitation dans un nouvel onglet pour que le
-                    // clic fasse toujours quelque chose.
+                    // trois canaux en parallèle : le premier qui atteint l'onglet Discord gagne
+                    writeLocal(LS_KEY, payload);
+                    broadcast(payload);
+                    store(KEY, payload);
+
                     let done = false;
                     const started = Date.now();
 
-                    const finish = (ok) => {
+                    const finish = ok => {
                         if (done) return;
                         done = true;
+                        delete btn.dataset.busy;
                         btn.dataset.sent = 'true';
                         btn.innerText = ok ? TEXT.sent : TEXT.opened;
                         btn.style.backgroundColor = ok ? '#5865F2' : '#B25E00';
@@ -107,8 +134,9 @@
                     const check = () => {
                         if (done) return;
 
-                        const ack = read(ACK, null);
-                        if (ack && ack.id === id) {
+                        const a = read(ACK, null);
+                        const b = readLocal(LS_ACK);
+                        if ((a && a.id === id) || (b && b.id === id)) {
                             finish(true);
                             return;
                         }
@@ -120,10 +148,10 @@
                             if (!tab) location.assign(url);
                             return;
                         }
-                        setTimeout(check, 250);
+                        setTimeout(check, 300);
                     };
 
-                    setTimeout(check, 250);
+                    setTimeout(check, 300);
                 };
 
                 return btn;
@@ -159,27 +187,39 @@
     }
 
     // =========================================================================
-    // 2. ONGLET DISCORD DÉJÀ OUVERT (toutes les autres pages discord.com)
+    // 2. ONGLET DISCORD DÉJÀ OUVERT
     // =========================================================================
-    if (!onInvitePage && location.hostname === 'discord.com') {
-        // une invitation déposée avant l'ouverture de cet onglet est ignorée
-        if (read(KEY, null)) store(KEY, null);
-
-        const consume = () => {
-            const pending = read(KEY, null);
-            if (!pending || !pending.code) return;
+    if (!onInvitePage && sameOrigin) {
+        const consume = pending => {
+            if (!pending || !pending.code || !pending.id) return;
+            if (Date.now() - (pending.ts || 0) > MAX_AGE) return;
 
             store(KEY, null);
             store(ACK, { id: pending.id, ts: Date.now() });
+            writeLocal(LS_ACK, { id: pending.id, ts: Date.now() });
 
-            if (Date.now() - (pending.ts || 0) > MAX_AGE) return;
-
-            // Navigue l'onglet Discord existant vers l'invitation : Discord affiche
-            // son écran « rejoindre le serveur », déjà connecté.
             location.assign(inviteUrl(pending.code));
         };
 
-        setInterval(consume, 1000);
-        consume();
+        // une invitation déposée avant l'ouverture de cet onglet est ignorée
+        if (read(KEY, null)) store(KEY, null);
+
+        // 1. message instantané entre onglets (fonctionne en arrière-plan)
+        try {
+            const bc = new BroadcastChannel(CHANNEL);
+            bc.onmessage = event => {
+                const data = event.data;
+                if (data && data.code) consume(data);
+            };
+        } catch (e) { /* pas de BroadcastChannel */ }
+
+        window.addEventListener('storage', event => {
+            if (event.key !== LS_KEY || !event.newValue) return;
+            try { consume(JSON.parse(event.newValue)); } catch (e) { /* ignoré */ }
+        });
+
+        // 2. filet de sécurité : relecture du stockage du gestionnaire
+        setInterval(() => consume(read(KEY, null)), 1000);
+        consume(read(KEY, null));
     }
 })();
