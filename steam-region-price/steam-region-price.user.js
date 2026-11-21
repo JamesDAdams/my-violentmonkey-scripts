@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Steam — Region price + key price (GG.deals)
 // @namespace    http://tampermonkey.net/
-// @version      4.3
+// @version      4.4
 // @description  Shows the Steam price of a game in a country of your choice, plus the cheapest key price from GG.deals, right on the store page.
 // @icon         https://raw.githubusercontent.com/JamesDAdams/my-violentmonkey-scripts/main/steam-region-price/icon.png
 // @match        https://store.steampowered.com/app/*
@@ -87,6 +87,9 @@
     };
 
     try {
+        let rawInstall = '';
+        try { rawInstall = (GM_info && GM_info.script && (GM_info.script.downloadURL || GM_info.script.updateURL)) || ''; } catch (e) { rawInstall = ''; }
+        console.info('[Steam region] install URL:', rawInstall || '(indisponible)');
         const source = STORED ? 'réglages enregistrés' : (PARAMS.key || PARAMS.gg || PARAMS.steam || PARAMS.s !== undefined ? 'paramètres d’installation' : 'valeurs du fichier');
         console.info('[Steam region] configuration (' + source + ') :', {
             cle: CONF.key ? 'définie' : 'absente',
@@ -342,7 +345,9 @@
     }
 
     // 3. RÉGLAGES EN PAGE (secours si les paramètres d'installation n'ont pas suivi)
-    function openSettings() {
+    const NEEDS_SETUP = !STORED && !PARAMS.key && !PARAMS.gg && !PARAMS.steam
+        && (!GG_DEALS_API_KEY || GG_DEALS_API_KEY === 'VOTRE_CLE_API_ICI');
+    function openSettings(notice) {
         if (document.querySelector('.srp-overlay')) return;
 
         const overlay = document.createElement('div');
@@ -350,7 +355,7 @@
         overlay.innerHTML = `
             <form class="srp-box">
                 <h3>Réglages — prix Steam & prix des clés</h3>
-                <p>Valeurs enregistrées par le gestionnaire de userscripts, sur votre machine.</p>
+                <p>${notice ? 'Aucune configuration détectée : renseignez-la une fois, elle restera sur votre machine.' : 'Valeurs enregistrées par le gestionnaire de userscripts, sur votre machine.'}</p>
                 <label>Clé API GG.deals (gg.deals/api)
                     <input type="text" name="key" autocomplete="off" spellcheck="false" placeholder="AbCdEf123456">
                 </label>
@@ -444,6 +449,7 @@
 
         if (subInput && actionBg) {
             addSettingsBadge(actionBg);
+            if (NEEDS_SETUP) openSettings(true);
             if (showRegion) fetchRegionPrice(subInput.value, true, actionBg);
 
             if (showKeys && !mainGameProcessed && mainAppId) {
