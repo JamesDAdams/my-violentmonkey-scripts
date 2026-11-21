@@ -4,6 +4,10 @@
 
 Un clic sur le bouton vert d'une page d'invitation Discord envoie l'invitation à l'onglet Discord déjà ouvert dans le navigateur — pas de seconde session, pas d'écran de connexion.
 
+## Aperçu
+
+<img src="screenshots/invite.png" width="320" alt="Page d'invitation Discord avec le bouton vert « Envoyer vers mon onglet Discord »">
+
 ## Ce que ça ajoute
 
 Sur `discord.com/invite/…` et `discord.gg/…`, un bouton **« Envoyer vers mon onglet Discord »** — ou **“Send to my Discord tab”** selon la langue du navigateur — apparaît juste sous le bouton d'envoi « Create Account ».

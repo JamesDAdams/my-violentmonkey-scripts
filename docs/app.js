@@ -22,6 +22,7 @@
       'discord.f2': 'The invite code travels through the userscript storage, then your Discord tab opens the invite and takes focus.',
       'discord.f3': 'No network request and no analytics: everything stays between your two tabs.',
       'discord.meta': 'Requires an open Discord tab',
+      'discord.alt': 'Discord invite page with the green “Send to my Discord tab” button',
       'help.title': 'No userscript manager yet?',
       'help.text': 'The Install button opens the script file. Violentmonkey or Tampermonkey catches it and offers to install — without one, the browser simply displays the code.',
       'help.btn': 'Get Violentmonkey',
@@ -46,6 +47,7 @@
       'discord.f2': 'Le code d’invitation transite par le stockage du gestionnaire de userscripts, puis l’onglet Discord ouvre l’invitation et reprend le focus.',
       'discord.f3': 'Aucune requête réseau, aucune analyse : tout reste entre vos deux onglets.',
       'discord.meta': 'Nécessite un onglet Discord ouvert',
+      'discord.alt': 'Page d’invitation Discord avec le bouton vert « Envoyer vers mon onglet Discord »',
       'help.title': 'Pas encore de gestionnaire de userscripts ?',
       'help.text': 'Le bouton Installer ouvre le fichier du script. Violentmonkey ou Tampermonkey l’intercepte et propose l’installation — sans gestionnaire, le navigateur affiche simplement le code.',
       'help.btn': 'Installer Violentmonkey',
@@ -82,6 +84,10 @@
     document.title = I18N[lang].title;
     const hero = document.getElementById('hero');
     if (hero && HERO[lang]) { hero.src = HERO[lang].src; hero.alt = HERO[lang].alt; }
+    for (const el of document.querySelectorAll('[data-i18n-alt]')) {
+      const text = I18N[lang][el.dataset.i18nAlt];
+      if (text != null) el.alt = text;
+    }
     try { localStorage.setItem(STORAGE_KEY, lang); } catch { /* stockage bloqué */ }
   };
 

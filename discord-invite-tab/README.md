@@ -4,6 +4,10 @@
 
 Click the green button on a Discord invite page and the invite is sent to the Discord tab already open in your browser — no second Discord session, no login screen.
 
+## Preview
+
+<img src="screenshots/invite.png" width="320" alt="Discord invite page with the green “Send to my Discord tab” button under Create Account">
+
 ## What it adds
 
 On `discord.com/invite/…` and `discord.gg/…`, a button **“Send to my Discord tab”** — or **« Envoyer vers mon onglet Discord »** depending on the browser language — appears right under the “Create Account” submit button.
