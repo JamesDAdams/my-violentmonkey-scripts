@@ -40,8 +40,8 @@
   };
 
   const HERO = {
-    en: { src: 'assets/preview-en.png', alt: 'Steam game page with the AI row listing the declared uses' },
-    fr: { src: 'assets/preview-fr.png', alt: 'Fiche Steam avec la ligne « IA » listant les usages déclarés' }
+    en: { src: 'assets/vignette-ia.png', alt: 'AI badge on a Steam game thumbnail' },
+    fr: { src: 'assets/vignette-ia.png', alt: 'Bandeau IA sur une vignette de jeu Steam' }
   };
 
   const STORAGE_KEY = 'mv-scripts-lang';
