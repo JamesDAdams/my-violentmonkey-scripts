@@ -142,10 +142,11 @@ main { flex: 1; padding: 34px 0 40px; }
 .shot {
   display: block;
   width: 100%;
-  max-width: 520px;
+  max-width: 640px;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+  border: 1px solid rgba(255, 255, 255, .06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
 }
 
 .card-body { padding: 22px 24px 20px; }
